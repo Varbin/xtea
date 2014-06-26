@@ -20,5 +20,6 @@ Example:
     
 Note
    
-    I does NOT guarantee that this implementation is secure. If there are bugs, tell me them. Python 3 support is at work.
+    I does NOT guarantee that this implementation is secure. If there are bugs, tell me them. 
+    Python 3 support is at work.
     My GPG/PGP key: 0CB97138 (full fingerprint: 8F93 4984 3BA7 4A1C E5F2  A1BA 1338 DFDE 0CB9 7138)
