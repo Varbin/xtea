@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-with open("README") as rm:
+with open("README.rst") as rm:
   long_text = rm.read()
 
 setup(name='xtea',
