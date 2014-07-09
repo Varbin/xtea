@@ -86,6 +86,8 @@ class XTEACipher(object):
             self.mode = kwargs["mode"]
         else:
             self.mode = MODE_ECB
+        if self.mode == MODE_CFB:
+            raise NotImplementedError("CFB mode is not implemented")
         if "IV" in keys:
             self.IV = kwargs["IV"]
             if len(self.IV) != self.block_size:
@@ -268,7 +270,7 @@ def _decrypt(key,block,n=32,endian="!"):
     Keyword arguments:
     key -- the key for encrypting (and decrypting)
     block  -- one block ciphertext
-    n -- cycles, one cycle is two rounds, more cycles
+    n -- cycles, one cycle is two rounds, more cycles =
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
