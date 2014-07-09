@@ -1,0 +1,8 @@
+# Cached files
+__pycache__/
+*.py[co]
+
+# Build
+dist/
+build/
+egg/

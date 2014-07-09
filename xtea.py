@@ -27,6 +27,8 @@ True
 
 import struct
 import binascii
+import sys
+import warnings
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -148,6 +150,7 @@ class XTEACipher(object):
 
         #CTR
         elif self.mode == MODE_CTR:
+            warnings.warn("This mode is buggy")
             blocks = self._block(data)
             out = []
             for block in blocks:
@@ -191,11 +194,16 @@ class XTEACipher(object):
 
         #CTR
         elif self.mode == MODE_CTR:
+            warnings.warn("This mode is buggy")
             blocks = self._block(data)
             out = []
             for block in blocks:
                 nc = struct.unpack(self.endian+"Q",_decrypt(self.key, block, self.rounds/2, self.endian))
-                out.append(longToString(nc[0]^self.counter()))
+                try:
+                    out.append(longToString(nc[0]^self.counter()))
+                except:
+                    warnings.warn("Unable to decrypt this block, block will be lost")
+                    out.append("\00"*8)
             return "".join(out)
 
     def _block(self, s):
@@ -301,3 +309,94 @@ def stringToLong(s):
 def longToString(n):
     """Convert some longs to string."""
     return binascii.unhexlify("%x" % n)
+
+c = 0  # Debug
+
+def _test():
+    global c
+    import os
+    print "Starting test..."
+    print "Testing ECB"
+    fails_ecb = 0
+    for i in range(25):
+        try:
+            plain = os.urandom(56)*8
+            e = new(os.urandom(16))
+            encrypted = e.encrypt(plain)
+            decrypted = e.decrypt(encrypted)
+            if decrypted != plain: fails_ecb += 1
+        except:
+            print >> sys.stderr, "Fail with Error..."
+            fails_ofb+=1
+            
+    print "Testing CBC"
+    fails_cbc = 0
+    for i in range(25):
+        try:
+            key = os.urandom(16)
+            iv = os.urandom(8)
+            c1 = new(key, mode=MODE_CBC, IV=iv)
+            c2 = new(key, mode=MODE_CBC, IV=iv)
+            plain = os.urandom(56)*8
+            encrypted = c1.encrypt(plain)
+            decrypted = c2.decrypt(encrypted)
+            if decrypted != plain: fails_cbc+=1
+            
+        except:
+            print >> sys.stderr, "Fail with Error..."
+            fails_ofb+=1
+    print "Testing OFB (function)"
+    fails_ofb = 0
+    for i in range(25):
+        try:
+            key = os.urandom(16)
+            plain = os.urandom(56)*8
+            encrypted = _crypt_ofb(key, plain)
+            decrypted = _crypt_ofb(key, encrypted)
+            if decrypted != plain:
+                fails_ofb+=1
+        except:
+            print >> sys.stderr, "Fail with Error..."
+            fails_ofb+=1
+    print "Testing CTR (WILL fail)"
+    fails_ctr = 0
+    def count():
+        global c
+        c += 1
+        return c
+    for i in range(25):
+        try:
+            key = os.urandom(16)
+            c_b = stringToLong(os.urandom(6))
+            c=c_b
+            cf = new(key, mode=MODE_CTR, counter=count)
+            plain = os.urandom(56)*8
+            encrypted = cf.encrypt(plain)
+            c=c_b
+            decrypted = cf.decrypt(encrypted)
+            if decrypted != plain:
+                fails_ctr+=1
+        except Warning:
+            pass
+        except:
+            print >> sys.stderr, "Fail with Error..."
+            fails_ctr += 1
+
+    print
+    print "Result"
+    print "="*15
+    print
+    print "Fails:"
+    print "+---+---+---+---+"
+    print "|ECB|CBC|OFB|CTR|"
+    print "+---+---+---+---+"
+    print "| %s| %s| %s| %s|" % (
+        str(fails_ecb).rjust(2,"0"),
+        str(fails_cbc).rjust(2,"0"),
+        str(fails_ofb).rjust(2,"0"),
+        str(fails_ctr).rjust(2,"0"))
+    print "+---+---+---+---+"
+            
+
+if __name__ == "__main__":
+    _test()
