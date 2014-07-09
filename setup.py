@@ -13,7 +13,7 @@ setup(name='xtea',
       author="Simon Biewald",
       author_email="simon.biewald@hotmail.de",
       url="https://github.com/Varbin/xtea",
-      license="Public Domain"
+      license="Public Domain",
       py_modules=['xtea'],
       classifiers=[
 	"Development Status :: 4 - Beta",
