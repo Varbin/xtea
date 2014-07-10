@@ -19,7 +19,8 @@ def git_push():
             break
         else:
             c = input("Oops! It failed! Try again? [Y/n] ")
-            if c.lower not in ["y", "yes", "z", "j", "ja", "zes", ""]:
+            print(c)
+            if c.lower() not in ["y", "yes", "z", "j", "ja", "zes", ""]:
                 # Z on US keyboard == Y on DE keyboard
                 break
 
