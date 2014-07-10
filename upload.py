@@ -18,8 +18,8 @@ def git_push():
             input("Everthing should be uploaded now...")
             break
         else:
-            c = input("Oops! It failed! Try again? [Y\\n]")
-            if c.lower not in ["y", "yes", "z", "j", "ja", "zes"]:
+            c = input("Oops! It failed! Try again? [Y/n] ")
+            if c.lower not in ["y", "yes", "z", "j", "ja", "zes", ""]:
                 # Z on US keyboard == Y on DE keyboard
                 break
 
