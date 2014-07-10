@@ -4,6 +4,8 @@ Changelog
 Version 0.2.1 - dev; Jul 10, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+[18w14c] Updated upload.py
+
 [18w14b] Fixed wrong dev number (0.2.1 -> 18w14) added upload.py for uploading to github
 
 [18w14a] Better Wheel support and changelog

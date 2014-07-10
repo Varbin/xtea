@@ -1,5 +1,8 @@
 from __future__ import with_statement
 import os
+import sys
+
+
 
 with open("changelog.rst") as cl:
     changelog = cl.read()
@@ -20,11 +23,16 @@ def git_push():
         else:
             c = input("Oops! It failed! Try again? [Y/n] ")
             print(c)
-            if c.lower() not in ["y", "yes", "z", "j", "ja", "zes", ""]:
+            if c.lower() not in ["y", "yes", "z", "j", "ja", "zes", "jes", ""]:
                 # Z on US keyboard == Y on DE keyboard
                 break
 
 
 if __name__ == "__main__":
-    git_update()
-    git_push()
+    if len(sys.argv)==1:
+        git_update()
+        git_push()
+    if "update" in sys.argv:
+        git_update()
+    if "push" in sys.argv:
+        git_push()
