@@ -4,7 +4,9 @@ Changelog
 Version 0.2.1 - dev; Jul 10, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.2.1] Better Wheel support and changelog
+[18w14b] Fixed wrong development number (0.2.1 -> 18w14)
+
+[18w14a] Better Wheel support and changelog
 
  - Added better wheel support for uploading (just for me) with a setup.cfg
  - Added this file (auto uploading on pypi/warehouse and github)
