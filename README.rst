@@ -1,6 +1,8 @@
+===========
 Python XTEA
+===========
 
-    This is a XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).
+    This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).
 
     XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
     The algorithm is secure at 2014 with the recommend 64 rounds (32 cycles). This
@@ -19,5 +21,7 @@ Example:
     True
     
 Note
+====
    
     I does NOT guarantee that this implementation is secure. If there are bugs, tell me them. 
+

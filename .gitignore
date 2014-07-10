@@ -1,8 +1,17 @@
 # Cached files
 __pycache__/
 *.py[co]
+*.class
 
 # Build
 dist/
 build/
 egg/
+*.egg-info/
+
+#Minimal Jython install for uploading and testing
+jython.bat
+jython.jar
+
+#git upload
+upload.py
