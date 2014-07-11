@@ -8,6 +8,8 @@ dist/
 build/
 egg/
 *.egg-info/
+# Sometimes they are there...
+*.egg
 
 #Minimal Jython install for uploading and testing
 jython.bat
