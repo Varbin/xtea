@@ -3,7 +3,6 @@ import os
 import sys
 
 
-
 with open("changelog.rst") as cl:
     changelog = cl.read()
 

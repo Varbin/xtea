@@ -23,5 +23,4 @@ Example:
 Note
 ====
    
-    I does NOT guarantee that this implementation is secure. If there are bugs, tell me them. 
-
+    I does NOT guarantee that this implementation (or the base cipher) is secure. If there are bugs, tell me them on github. 
