@@ -35,5 +35,5 @@ Version 0.1; Jun 22, 2014
 [0.1] Initial release
 
  - Supports all mode except CFB
- - Buggy CTR ( "ß" = "\xc3\x9f" )
+ - Buggy CTR ( "ï¿½" = "\\xc3\\x9f" )
  - Working with PEP 272, default mode is ECB
