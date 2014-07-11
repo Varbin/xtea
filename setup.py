@@ -15,7 +15,7 @@ def get_file(name):
     with open(name) as f:
         return f.read()
 
-long_text = get_file("README.rst") + get_file("changelog.rst")
+long_text = get_file("README.rst") + "\n\n" + get_file("changelog.rst")
 
 setup(name='xtea',
       version='0.3.1',
@@ -24,7 +24,7 @@ setup(name='xtea',
       author="Simon Biewald",
       author_email="simon.biewald@hotmail.de",
       url="https://github.com/Varbin/xtea/wiki",
-      
+      download_url="https://github.com/Varbin/xtea",
       license="Public Domain",
       py_modules=['xtea'],
       classifiers=[
