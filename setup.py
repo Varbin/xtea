@@ -18,7 +18,7 @@ def get_file(name):
 long_text = get_file("README.rst") + get_file("changelog.rst")
 
 setup(name='xtea',
-      version='0.2.1-dev',
+      version='0.3.0',
       description="A python version of XTEA",
       long_description = long_text,
       author="Simon Biewald",

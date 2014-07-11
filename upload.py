@@ -26,6 +26,9 @@ def git_push():
                 # Z on US keyboard == Y on DE keyboard
                 break
 
+def git_pull():
+    os.system("git pull")
+
 
 if __name__ == "__main__":
     if len(sys.argv)==1:
@@ -33,5 +36,8 @@ if __name__ == "__main__":
         git_push()
     if "update" in sys.argv:
         git_update()
+    if "pull" in sys.argv:
+        git_pull()
     if "push" in sys.argv:
         git_push()
+        
