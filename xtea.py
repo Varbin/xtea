@@ -360,7 +360,7 @@ def _test():
             if decrypted != plain: fails_ecb += 1
         except:
             print >> sys.stderr, "Fail with Error..."
-            fails_ofb+=1
+            fails_ecb+=1
             
     print "Testing CBC"
     fails_cbc = 0
@@ -377,7 +377,7 @@ def _test():
             
         except:
             print >> sys.stderr, "Fail with Error..."
-            fails_ofb+=1
+            fails_cbc+=1
     print "Testing OFB (function)"
     fails_ofb = 0
     for i in range(25):
@@ -415,6 +415,7 @@ def _test():
             print >> sys.stderr, "Fail with Error..."
             fails_ctr += 1
 
+    print
     print
     print "Result"
     print "="*15
