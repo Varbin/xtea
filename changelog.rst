@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+Version 0.3.1; Jul 11, 2014
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[0.3.1] Minor Fixes
+
+ - Fixed that the length of data will not be checked
+
 Version 0.3.0; Jul 11, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

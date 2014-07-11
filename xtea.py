@@ -182,7 +182,7 @@ class XTEACipher(object):
         """
         #ECB
         if self.mode == MODE_ECB:
-            if not len(data) % (self.block_size):
+            if not (len(data) % self.block_size):
                 out = []
                 blocks=self._block(data)
                 for block in blocks:
@@ -193,12 +193,20 @@ class XTEACipher(object):
 
         #CBC
         elif self.mode == MODE_CBC:
-            out = []
-            blocks = self._block(data)
-            blocks = [self.IV]+blocks
-            for i in range(1, len(blocks)):
-                out.append(xor_strings(_decrypt(self.key,blocks[i],self.rounds/2,self.endian), blocks[i-1]))
-            return "".join(out)
+            if not (len(data) % self.block_size):
+                out = []
+                blocks = self._block(data)
+                blocks = [self.IV]+blocks
+                for i in range(1, len(blocks)):
+                    out.append(
+                        xor_strings(
+                            _decrypt(
+                                self.key,blocks[i]
+                                ,self.rounds/2,
+                                self.endian),
+                            blocks[i-1])
+                        )
+                return "".join(out)
         #OFB
         elif self.mode == MODE_OFB:
             return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
