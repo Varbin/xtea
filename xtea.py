@@ -4,7 +4,7 @@ XTEA-Cipher in Python (eXtended Tiny Encryption Algorithm)
 XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
 The algorithm is secure at 2014 with the recommend 64 rounds (32 cycles). This
 implementation supports following modes of operation:
-ECB, CBC, OFB, CTR
+ECB, CBC, CFB, OFB, CTR
 
 Example:
 
@@ -33,6 +33,7 @@ import warnings
 MODE_ECB = 1
 MODE_CBC = 2
 MODE_CFB = 3
+MODE_PGP = 4
 MODE_OFB = 5
 MODE_CTR = 6
 
@@ -65,7 +66,7 @@ class XTEACipher(object):
     _block -- splits the data in blocks (you may need padding)
 
     Constants:
-    bloc_size = 8
+    block_size = 8
 
     Variables:
     IV -- the initialisation vector (default None or "\00"*8)
@@ -88,8 +89,8 @@ class XTEACipher(object):
             self.mode = kwargs["mode"]
         else:
             self.mode = MODE_ECB
-        if self.mode == MODE_CFB:
-            raise NotImplementedError("CFB mode is not implemented")
+        if self.mode == MODE_PGP:
+            raise NotImplementedError("PGP-CFB is not implemented")
         if "IV" in keys:
             self.IV = kwargs["IV"]
             if len(self.IV) != self.block_size:
@@ -122,7 +123,7 @@ class XTEACipher(object):
 
         #ECB
         if self.mode == MODE_ECB:
-            if not len(data) % (self.block_size/8):
+            if not len(data) % (self.block_size):
                 out = []
                 blocks=self._block(data)
                 for block in blocks:
@@ -133,7 +134,7 @@ class XTEACipher(object):
 
         #CBC
         elif self.mode == MODE_CBC:
-            if not len(data) % (self.block_size/8):
+            if not len(data) % (self.block_size):
                 out = [self.IV]
                 blocks=self._block(data)
                 for i in range(0, len(blocks)):
@@ -147,6 +148,18 @@ class XTEACipher(object):
             return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
 
         #CFB
+        elif self.mode == MODE_CFB:
+            if not len(data) % self.block_size:
+                blocks = self._block(data)
+                out = []
+                fb = self.IV
+                for bn in blocks:
+                    tx = _encrypt(self.key, fb, self.rounds/2, self.endian)
+                    fb = xor_strings(bn, tx)
+                    out.append(fb)
+                return "".join(out)
+            else:
+                raise ValueError("Input string must be a multiple of blocksize in length")
 
         #CTR
         elif self.mode == MODE_CTR:
@@ -169,7 +182,7 @@ class XTEACipher(object):
         """
         #ECB
         if self.mode == MODE_ECB:
-            if not len(data) % (self.block_size/8):
+            if not len(data) % (self.block_size):
                 out = []
                 blocks=self._block(data)
                 for block in blocks:
@@ -191,6 +204,18 @@ class XTEACipher(object):
             return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
 
         #CFB
+        elif self.mode == MODE_CFB:
+            if not len(data) % self.block_size:
+                blocks = self._block(data)
+                out = []
+                fb = self.IV
+                for block in blocks:
+                    tx = _encrypt(self.key, fb, self.rounds/2, self.endian)
+                    fb = block[:]
+                    out.append(xor_strings(block,tx))
+                return "".join(out)
+            else:
+                raise ValueError("Input string must be a multiple of blocksize in length")
 
         #CTR
         elif self.mode == MODE_CTR:
@@ -386,6 +411,7 @@ def _test():
     print "Result"
     print "="*15
     print
+    print
     print "Fails:"
     print "+---+---+---+---+"
     print "|ECB|CBC|OFB|CTR|"
@@ -396,7 +422,6 @@ def _test():
         str(fails_ofb).rjust(2,"0"),
         str(fails_ctr).rjust(2,"0"))
     print "+---+---+---+---+"
-            
 
 if __name__ == "__main__":
     _test()
