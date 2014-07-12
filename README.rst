@@ -7,7 +7,9 @@ Python XTEA
     XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
     The algorithm is secure at 2014 with the recommend 64 rounds (32 cycles). This
     implementation supports following modes of operation:
-    ECB, CBC, CFB, OFB, CTR (buggy)
+    ECB, CBC, CFB, OFB, CTR
+	
+	It also supports CBC-MAC.
 
 
 Example:
@@ -24,3 +26,4 @@ Note
 ====
    
     I does NOT guarantee that this implementation (or the base cipher) is secure. If there are bugs, tell me them on github. 
+
