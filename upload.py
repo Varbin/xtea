@@ -11,7 +11,6 @@ def git_update():
         changelog = cl.read()
     lines = changelog.splitlines()
     main = lines[6] # News
-    print (main)
     os.system("git add *")
     os.system("git commit -m \"%s\"" % main) # Bad, old py2 syntay
 
