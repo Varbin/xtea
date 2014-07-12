@@ -29,6 +29,7 @@ import struct
 import binascii
 import sys
 import warnings
+import types
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -36,6 +37,8 @@ MODE_CFB = 3
 MODE_PGP = 4
 MODE_OFB = 5
 MODE_CTR = 6
+
+MODE_CCM = 8 # Unofficial
 
 
 block_size = 64
@@ -55,6 +58,7 @@ def new(key, **kwargs):
     endian -- how to use struct (default "!" (big endian/network))    """
     return XTEACipher(key, **kwargs)
 
+################ XTEACipher class
 
 class XTEACipher(object):
     """The cipher class
@@ -82,35 +86,35 @@ class XTEACipher(object):
         """Initiate the cipher
         same arguments as for new."""
         self.key = key
-        if len(key) != key_size/8:
+        if len(key) != key_size/8: # Check key len
             raise ValueError("Key must be 128 bit long")
-        keys = kwargs.keys()
-        if "mode" in keys:
-            self.mode = kwargs["mode"]
+        keys = kwargs.keys() # arguments
+        if "mode" in keys: # check for mode
+            self.mode = kwargs["mode"] # read mode
         else:
-            self.mode = MODE_ECB
-        if self.mode == MODE_PGP:
+            self.mode = MODE_ECB # if not given
+        if self.mode == MODE_PGP: 
             raise NotImplementedError("PGP-CFB is not implemented")
-        if "IV" in keys:
+        if "IV" in keys: # get iv
             self.IV = kwargs["IV"]
-            if len(self.IV) != self.block_size:
+            if len(self.IV) != self.block_size: # iv len = blocksize
                 raise ValueError("IV must be 8 bytes long")
-        elif self.mode == MODE_CBC or self.mode == MODE_CFB:
+        elif self.mode == MODE_CBC or self.mode == MODE_CFB: # cfb & cbc need iv
             raise ValueError("CBC, CFB need an IV")
-        elif self.mode == MODE_OFB:
+        elif self.mode == MODE_OFB: # ofb nocne if not given = "\x00" * 16
             self.IV = '\00\00\00\00\00\00\00\00'
-        if "counter" in keys:
+        if "counter" in keys: # ctr needs counter
             self.counter = kwargs["counter"]
-        elif self.mode == MODE_CTR:
+        elif self.mode == MODE_CTR: # if ctr and counter not given
             raise ValueError("CTR needs a counter")
-        if "rounds" in keys:
+        if "rounds" in keys: # rounds to operate
             self.rounds = kwargs["rounds"]
         else:
             self.rounds = 64
-        if "endian" in keys:
+        if "endian" in keys: # endian for struct str -> int -> str (byte order)
             self.endian = kwargs["endian"]
         else:
-            self.endian = "!"
+            self.endian = "!" # default network/big endian
 
     def encrypt(self, data):
         """Encrypt data.
@@ -163,13 +167,30 @@ class XTEACipher(object):
 
         #CTR
         elif self.mode == MODE_CTR:
-            warnings.warn("This mode is buggy")
+            l = (types.IntType, types.LongType, types.FloatType) # Typelist
+            
             blocks = self._block(data)
             out = []
             for block in blocks:
                 c = self.counter()
-                n = stringToLong(block)
-                out.append(_encrypt(self.key,struct.pack(self.endian+'Q', n^c), self.rounds/2, self.endian))
+                if type(c) in l:
+                    warnings.warn(
+                        "Numbers as counter-value is buggy and deprecated!",
+                        DeprecationWarning)
+                    n = stringToLong(block)
+                    out.append(
+                        _encrypt(
+                            self.key,struct.pack(self.endian+'Q', n^c),
+                            self.rounds/2, self.endian))
+                else:
+                    n = block
+                    out.append(
+                        _encrypt(
+                            self.key,
+                            xor_strings(n, c),
+                            self.rounds/2,
+                            self.endian)
+                        )
             return "".join(out)
 
     def decrypt(self, data):
@@ -227,16 +248,26 @@ class XTEACipher(object):
 
         #CTR
         elif self.mode == MODE_CTR:
-            warnings.warn("This mode is buggy")
+            l = (types.IntType, types.LongType, types.FloatType)
             blocks = self._block(data)
             out = []
             for block in blocks:
-                nc = struct.unpack(self.endian+"Q",_decrypt(self.key, block, self.rounds/2, self.endian))
-                try:
-                    out.append(longToString(nc[0]^self.counter()))
-                except:
-                    warnings.warn("Unable to decrypt this block, block will be lost")
-                    out.append("\00"*8)
+                c = self.counter()
+                if type(c) in l:
+                    warnings.warn(
+                        "Numbers as counter-value are buggy and deprecated!",
+                        DeprecationWarning)
+                    nc = struct.unpack(self.endian+"Q",_decrypt(self.key, block, self.rounds/2, self.endian))
+                    try:
+                        out.append(longToString(nc[0]^c))
+                    except:
+                        warnings.warn(
+                            "Unable to decrypt this block, block is lost",
+                            RuntimeWarning)
+                        out.append("\00"*8)
+                else:
+                    nc = _decrypt(self.key, block, self.rounds/2, self.endian)
+                    out.append(xor_strings(nc, c))
             return "".join(out)
 
     def _block(self, s):
@@ -248,11 +279,32 @@ class XTEACipher(object):
             raise ValueError()
         return l
 
+################ CBCMAC class
 
+class CBCMAC(object):
+    digest_size = 8
+    """Just a small implementation of the CBCMAC algorithm, based on XTEA."""
+    def __init__(self, key, string="", endian="!"):
+        self.cipher = new(key, mode=MODE_CBC, IV="\00"*8, endian=endian)
+        self.text = string
+        self.key = key
+
+    @staticmethod
+    def new(key, string="", endian="!"):
+        return CBCMAC(key, string, endian)
+
+    def update(self, string):
+        self.text += string
+
+    def digest(self):
+        return self.cipher.encrypt(self.text)[-8:]
+
+    def hexdigest(self):
+        return binascii.hexlify(self.digest())
 
 ################ Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
 """
-This a utilities only, use them only if you know what you do.
+This are utilities only, use them only if you know what you do.
 
 Functions:
 _crypt_ofb -- Encrypt or decrypt data in OFB mode.
@@ -343,15 +395,17 @@ def longToString(n):
     """Convert some longs to string."""
     return binascii.unhexlify("%x" % n)
 
-c = 0  # Debug
+c = 0  # Test (double global)
 
 def _test():
     global c
     import os
+    from time import clock
     print "Starting test..."
     print "Testing ECB"
     fails_ecb = 0
-    for i in range(25):
+    start = clock()
+    for i in range(250):
         try:
             plain = os.urandom(56)*8
             e = new(os.urandom(16))
@@ -361,10 +415,13 @@ def _test():
         except:
             print >> sys.stderr, "Fail with Error..."
             fails_ecb+=1
-            
+    end = clock()
+    time_ecb = end - start
+
     print "Testing CBC"
     fails_cbc = 0
-    for i in range(25):
+    start = clock()
+    for i in range(250):
         try:
             key = os.urandom(16)
             iv = os.urandom(8)
@@ -378,9 +435,33 @@ def _test():
         except:
             print >> sys.stderr, "Fail with Error..."
             fails_cbc+=1
+    end = clock()
+    time_cbc = end - start
+
+    print "Testing CFB"
+    fails_cfb = 0
+    start = clock()
+    for i in range(250):
+        try:
+            key = os.urandom(16)
+            iv = os.urandom(8)
+            c1 = new(key, mode=MODE_CFB, IV=iv)
+            c2 = new(key, mode=MODE_CFB, IV=iv)
+            plain = os.urandom(56)*8
+            encrypted = c1.encrypt(plain)
+            decrypted = c2.decrypt(encrypted)
+            if decrypted != plain: fails_cfb+=1
+            
+        except:
+            print >> sys.stderr, "Fail with Error..."
+            fails_cfb+=1
+    end = clock()
+    time_cfb = end - start
+            
     print "Testing OFB (function)"
     fails_ofb = 0
-    for i in range(25):
+    start = clock()
+    for i in range(250):
         try:
             key = os.urandom(16)
             plain = os.urandom(56)*8
@@ -391,13 +472,17 @@ def _test():
         except:
             print >> sys.stderr, "Fail with Error..."
             fails_ofb+=1
-    print "Testing CTR (WILL fail)"
+    end = clock()
+    time_ofb = end - start
+    
+    print "Testing CTR (old number-counter)"
     fails_ctr = 0
     def count():
         global c
         c += 1
         return c
-    for i in range(25):
+    start = clock()
+    for i in range(250):
         try:
             key = os.urandom(16)
             c_b = stringToLong(os.urandom(6))
@@ -411,9 +496,13 @@ def _test():
                 fails_ctr+=1
         except Warning:
             pass
-        except:
+        except DeprecationWarning:
+            print "Outdated test function..."
+        except Exception:
             print >> sys.stderr, "Fail with Error..."
             fails_ctr += 1
+    end = clock()
+    time_ctr = end - start
 
     print
     print
@@ -422,15 +511,24 @@ def _test():
     print
     print
     print "Fails:"
-    print "+---+---+---+---+"
-    print "|ECB|CBC|OFB|CTR|"
-    print "+---+---+---+---+"
-    print "| %s| %s| %s| %s|" % (
-        str(fails_ecb).rjust(2,"0"),
-        str(fails_cbc).rjust(2,"0"),
-        str(fails_ofb).rjust(2,"0"),
-        str(fails_ctr).rjust(2,"0"))
-    print "+---+---+---+---+"
+    print
+    print "|ECB|CBC|CFB|OFB|CTR|"
+    print "|---|---|---|---|---|"
+    print "|%s|%s|%s|%s|%s|" % (
+        str(fails_ecb).rjust(3,"0"),
+        str(fails_cbc).rjust(3,"0"),
+        str(fails_cfb).rjust(3,"0"),
+        str(fails_ofb).rjust(3,"0"),
+        str(fails_ctr).rjust(3,"0"))
+    print
+    print "Time:"
+    print
+    print "ECB: %s\nCBC: %s\nCFB: %s\nOFB: %s\nCTR: %s\n" % (
+        str(time_ecb),
+        str(time_cbc),
+        str(time_cfb),
+        str(time_ofb),
+        str(time_ctr))
 
 if __name__ == "__main__":
     _test()

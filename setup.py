@@ -18,13 +18,14 @@ def get_file(name):
 long_text = get_file("README.rst") + "\n\n" + get_file("changelog.rst")
 
 setup(name='xtea',
-      version='0.3.1',
+      version='0.4.0-dev',
       description="A python version of XTEA",
       long_description = long_text,
       author="Simon Biewald",
       author_email="simon.biewald@hotmail.de",
       url="https://github.com/Varbin/xtea/wiki",
       download_url="https://github.com/Varbin/xtea",
+      bugtrack_url="https://github.com/Varbin/xtea/issues",
       license="Public Domain",
       py_modules=['xtea'],
       classifiers=[

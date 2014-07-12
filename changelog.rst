@@ -2,6 +2,14 @@
 Changelog
 ---------
 
+Version 0.4.0; Jul 12, 2014
+
+[0.4.0] Buggless & PEP compliant CTR | added CBCMAC
+
+ - CTR mode works with strings now
+ - raises DeprecatedWarning if a number is returned
+ - CBCMAC class added (use static method CBCMAC.new(args) to generate)
+
 Version 0.3.2; Jul 11, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
