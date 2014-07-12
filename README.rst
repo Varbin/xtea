@@ -9,7 +9,7 @@ Python XTEA
     implementation supports following modes of operation:
     ECB, CBC, CFB, OFB, CTR
 	
-	It also supports CBC-MAC.
+    It also supports CBC-MAC.
 
 
 Example:
