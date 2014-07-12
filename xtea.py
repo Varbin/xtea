@@ -282,7 +282,10 @@ class XTEACipher(object):
 ################ CBCMAC class
 
 class CBCMAC(object):
+    name = "xtea-cbcmac"
+    block_size = 64
     digest_size = 8
+    
     """Just a small implementation of the CBCMAC algorithm, based on XTEA."""
     def __init__(self, key, string="", endian="!"):
         self.cipher = new(key, mode=MODE_CBC, IV="\00"*8, endian=endian)
@@ -295,6 +298,9 @@ class CBCMAC(object):
 
     def update(self, string):
         self.text += string
+
+    def copy(self):
+        return CBCMAC.new(self.key, self.text, self.cipher.endian)
 
     def digest(self):
         return self.cipher.encrypt(self.text)[-8:]

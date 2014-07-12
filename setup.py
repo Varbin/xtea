@@ -18,7 +18,7 @@ def get_file(name):
 long_text = get_file("README.rst") + "\n\n" + get_file("changelog.rst")
 
 setup(name='xtea',
-      version='0.4.0-dev',
+      version='0.4.0',
       description="A python version of XTEA",
       long_description = long_text,
       author="Simon Biewald",
@@ -26,6 +26,7 @@ setup(name='xtea',
       url="https://github.com/Varbin/xtea/wiki",
       download_url="https://github.com/Varbin/xtea",
       bugtrack_url="https://github.com/Varbin/xtea/issues",
+      keywords = "xtea tea encryption crypt", 
       license="Public Domain",
       py_modules=['xtea'],
       classifiers=[
