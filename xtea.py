@@ -288,6 +288,7 @@ class CBCMAC(object):
     
     """Just a small implementation of the CBCMAC algorithm, based on XTEA."""
     def __init__(self, key, string="", endian="!"):
+        warnings.warn("This is experimental!")
         self.cipher = new(key, mode=MODE_CBC, IV="\00"*8, endian=endian)
         self.text = string
         self.key = key
