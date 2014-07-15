@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Xtea by Varbin</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Xtea</h1>
+        <h2>A python version of XTEA</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/Varbin/xtea/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/Varbin/xtea/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/Varbin/xtea" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a name="python-xtea" class="anchor" href="#python-xtea"><span class="octicon octicon-link"></span></a>Python XTEA</h1>
+
+<p>This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).</p>
+
+<p>XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
+The algorithm is secure at 2014 with the recommend 64 rounds (32 cycles). This
+implementation supports following modes of operation:
+ECB, CBC, CFB, OFB, CTR
+It also supports CBC-MAC.</p>
+
+<p>The implementation is <a href="http://legacy.python.org/dev/peps/pep-0272/">PEP-272</a> compliant and is in the public domain.</p>
+
+<h2>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example:</h2>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">xtea</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">key</span> <span class="o">=</span> <span class="s">" "</span><span class="o">*</span><span class="mi">16</span>  <span class="c"># Never use this key</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">text</span> <span class="o">=</span> <span class="s">"This is a text. "</span><span class="o">*</span><span class="mi">8</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">new</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE_OFB</span><span class="p">,</span> <span class="n">IV</span><span class="o">=</span><span class="s">"12345678"</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">text</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="bp">True</span>
+</pre></div>
+
+<h2>
+<a name="note" class="anchor" href="#note"><span class="octicon octicon-link"></span></a>Note</h2>
+
+<p>I does NOT guarantee that this implementation (or the base cipher) is secure. If there are bugs, tell me them please. </p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
