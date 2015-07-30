@@ -12,13 +12,16 @@ except ImportError:
     from distutils.core import setup
 
 def get_file(name):
-    with open(name) as f:
-        return f.read()
+    try:
+        with open(name) as f:
+            return f.read()
+    except:
+        return ''
 
 long_text = get_file("README.rst") + "\n\n" + get_file("changelog.rst")
 
 setup(name='xtea',
-      version='0.4.0',
+      version='0.4.1',
       description="A python version of XTEA",
       long_description = long_text,
       author="Simon Biewald",

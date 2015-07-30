@@ -1,8 +1,13 @@
-
 Changelog
 ---------
 
+Version 0.4.1; Jul 30, 2015
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[0.4.1] Fixed installer
+
 Version 0.4.0; Jul 12, 2014
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [0.4.0] Buggless & PEP compliant CTR | added CBCMAC
 
