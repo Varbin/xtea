@@ -279,35 +279,6 @@ class XTEACipher(object):
             raise ValueError()
         return l
 
-################ CBCMAC class
-
-class CBCMAC(object):
-    name = "xtea-cbcmac"
-    block_size = 64
-    digest_size = 8
-    
-    """Just a small implementation of the CBCMAC algorithm, based on XTEA."""
-    def __init__(self, key, string="", endian="!"):
-        warnings.warn("This is experimental!")
-        self.cipher = new(key, mode=MODE_CBC, IV="\00"*8, endian=endian)
-        self.text = string
-        self.key = key
-
-    @staticmethod
-    def new(key, string="", endian="!"):
-        return CBCMAC(key, string, endian)
-
-    def update(self, string):
-        self.text += string
-
-    def copy(self):
-        return CBCMAC.new(self.key, self.text, self.cipher.endian)
-
-    def digest(self):
-        return self.cipher.encrypt(self.text)[-8:]
-
-    def hexdigest(self):
-        return binascii.hexlify(self.digest())
 
 ################ Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
 """
