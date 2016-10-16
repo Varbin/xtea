@@ -133,6 +133,14 @@ class XTEACipher(object):
                         yield ord(k)
             self._keygen = keygen()
 
+        elif self.mode == MODE_CTR:
+            def keygen():
+                while True:
+                    self.IV = _encrypt(self.key, self.counter(),
+                                       self.rounds//2)
+                    for k in self.IV:
+                        yield ord(k)
+
     def encrypt(self, data):
         """Encrypt data.
 
@@ -173,7 +181,7 @@ class XTEACipher(object):
         #OFB
         elif self.mode == MODE_OFB:
             #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
-            return self._ofb(data)
+            return self._stream(data)
 
         #CFB
         elif self.mode == MODE_CFB:
@@ -194,34 +202,7 @@ class XTEACipher(object):
 
         #CTR
         elif self.mode == MODE_CTR:
-            l = (types.IntType, types.LongType, types.FloatType) # Typelist
-            
-            blocks = self._block(data)
-            out = []
-
-            for block in blocks:
-                c = self.counter()
-
-                if type(c) in l:
-                    warnings.warn(
-                        "Numbers as counter-value is buggy and deprecated!",
-                        DeprecationWarning)
-                    n = stringToLong(block)
-                    out.append(
-                        _encrypt(
-                            self.key,struct.pack(self.endian+'Q', n^c),
-                            self.rounds/2, self.endian))
-                else:
-                    n = block
-                    out.append(
-                        _encrypt(
-                            self.key,
-                            xor_strings(n, c),
-                            self.rounds/2,
-                            self.endian)
-                        )
-
-            return "".join(out)
+            return self._stream(data)
 
     def decrypt(self, data):
         """Decrypt data.
@@ -262,7 +243,7 @@ class XTEACipher(object):
         #OFB
         elif self.mode == MODE_OFB:
             #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
-            return self._ofb(data)
+            return self._stream(data)
 
         #CFB
         elif self.mode == MODE_CFB:
@@ -281,31 +262,9 @@ class XTEACipher(object):
 
         #CTR
         elif self.mode == MODE_CTR:
-            l = (types.IntType, types.LongType, types.FloatType)
-            blocks = self._block(data)
-            out = []
-            for block in blocks:
-                c = self.counter()
-                if type(c) in l:
-                    warnings.warn(
-                        "Numbers as counter-value are buggy and deprecated!",
-                        DeprecationWarning)
-                    nc = struct.unpack(self.endian+"Q",_decrypt(self.key, block, self.rounds/2, self.endian))
-                    try:
-                        out.append(longToString(nc[0]^c))
-                    except:
-                        warnings.warn(
-                            "Unable to decrypt this block, block is lost",
-                            RuntimeWarning)
-                        out.append("\00"*8)
+            return self._stream(data)
 
-                else:
-                    nc = _decrypt(self.key, block, self.rounds/2, self.endian)
-                    out.append(xor_strings(nc, c))
-
-            return "".join(out)
-
-    def _ofb(self, data):
+    def _stream(self, data):
         xor = [ chr(x^y) for (x,y) in zip(map(ord,data),self._keygen) ]
         return "".join(xor)
 
