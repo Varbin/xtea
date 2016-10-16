@@ -85,6 +85,7 @@ class XTEACipher(object):
     def __init__(self, key, **kwargs):
         """Initiate the cipher
         same arguments as for new."""
+
         self.key = key
         if len(key) != key_size/8: # Check key len
             raise ValueError("Key must be 128 bit long")
@@ -115,6 +116,14 @@ class XTEACipher(object):
             self.endian = kwargs["endian"]
         else:
             self.endian = "!" # default network/big endian
+
+        if self.mode == MODE_OFB:
+            def keygen():
+                while True:
+                    self.IV = _encrypt(self.key,self.IV,self.rounds//2)
+                    for k in self.IV:
+                        yield ord(k)
+            self._keygen = keygen()
 
     def encrypt(self, data):
         """Encrypt data.
@@ -149,7 +158,8 @@ class XTEACipher(object):
                 raise ValueError("Input string must be a multiple of blocksize in length")
         #OFB
         elif self.mode == MODE_OFB:
-            return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
+            #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
+            return self._ofb(data)
 
         #CFB
         elif self.mode == MODE_CFB:
@@ -230,7 +240,8 @@ class XTEACipher(object):
                 return "".join(out)
         #OFB
         elif self.mode == MODE_OFB:
-            return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
+            #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
+            return self._ofb(data)
 
         #CFB
         elif self.mode == MODE_CFB:
@@ -270,6 +281,10 @@ class XTEACipher(object):
                     out.append(xor_strings(nc, c))
             return "".join(out)
 
+    def _ofb(self, data):
+        xor = [ chr(x^y) for (x,y) in zip(map(ord,data),self._keygen) ]
+        return "".join(xor)
+
     def _block(self, s):
         l = []
         rest_size = len(s) % self.block_size
@@ -293,24 +308,6 @@ stringToLong -- Convert any string to a number.
 longToString --Convert some longs to string.
 """
 
-def _crypt_ofb(key,data,iv='\00\00\00\00\00\00\00\00',n=32):
-    """Encrypt or decrypt data in OFB mode.
-
-    Only use if you know what you do.
-
-    Keyword arguments:
-    key -- the key for encrypting (and decrypting)
-    data -- plain / ciphertext
-    iv -- initialisation vector (default "\x00"*8)
-    n -- cycles, more cycles -> more security (default 32)
-    """
-    def keygen(key,iv,n):
-        while True:
-            iv = _encrypt(key,iv,n)
-            for k in iv:
-                yield ord(k)
-    xor = [ chr(x^y) for (x,y) in zip(map(ord,data),keygen(key,iv,n)) ]
-    return "".join(xor)
 
 def _encrypt(key,block,n=32,endian="!"):
     """Encrypt one single block of data.
@@ -326,7 +323,7 @@ def _encrypt(key,block,n=32,endian="!"):
     """
     v0,v1 = struct.unpack(endian+"2L",block)
     k = struct.unpack(endian+"4L",key)
-    sum,delta,mask = 0L,0x9e3779b9L,0xffffffffL
+    sum,delta,mask = 0, 0x9e3779b9, 0xffffffff
     for round in range(n):
         v0 = (v0 + (((v1<<4 ^ v1>>5) + v1) ^ (sum + k[sum & 3]))) & mask
         sum = (sum + delta) & mask
@@ -347,7 +344,7 @@ def _decrypt(key,block,n=32,endian="!"):
     """
     v0,v1 = struct.unpack(endian+"2L",block)
     k = struct.unpack(endian+"4L",key)
-    delta,mask = 0x9e3779b9L,0xffffffffL
+    delta,mask = 0x9e3779b9,0xffffffff
     sum = (delta * n) & mask
     for round in range(n):
         v1 = (v1 - (((v0<<4 ^ v0>>5) + v0) ^ (sum + k[sum>>11 & 3]))) & mask
