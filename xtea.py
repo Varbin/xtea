@@ -89,13 +89,18 @@ class XTEACipher(object):
         self.key = key
         if len(key) != key_size/8: # Check key len
             raise ValueError("Key must be 128 bit long")
+
         keys = kwargs.keys() # arguments
+
         if "mode" in keys: # check for mode
             self.mode = kwargs["mode"] # read mode
         else:
             self.mode = MODE_ECB # if not given
+            warnings.warn("Using implicit ECB!")
+
         if self.mode == MODE_PGP: 
             raise NotImplementedError("PGP-CFB is not implemented")
+
         if "IV" in keys: # get iv
             self.IV = kwargs["IV"]
             if len(self.IV) != self.block_size: # iv len = blocksize
@@ -104,14 +109,17 @@ class XTEACipher(object):
             raise ValueError("CBC, CFB need an IV")
         elif self.mode == MODE_OFB: # ofb nocne if not given = "\x00" * 16
             self.IV = '\00\00\00\00\00\00\00\00'
+
         if "counter" in keys: # ctr needs counter
             self.counter = kwargs["counter"]
         elif self.mode == MODE_CTR: # if ctr and counter not given
             raise ValueError("CTR needs a counter")
+
         if "rounds" in keys: # rounds to operate
             self.rounds = kwargs["rounds"]
         else:
             self.rounds = 64
+
         if "endian" in keys: # endian for struct str -> int -> str (byte order)
             self.endian = kwargs["endian"]
         else:
@@ -139,8 +147,10 @@ class XTEACipher(object):
             if not len(data) % (self.block_size):
                 out = []
                 blocks=self._block(data)
+
                 for block in blocks:
                     out.append(_encrypt(self.key, block, self.rounds/2, self.endian))
+
                 return "".join(out)
             else:
                 raise ValueError("Input string must be a multiple of blocksize in length")
@@ -150,12 +160,16 @@ class XTEACipher(object):
             if not len(data) % (self.block_size):
                 out = [self.IV]
                 blocks=self._block(data)
+
                 for i in range(0, len(blocks)):
                     xored = xor_strings(blocks[i], out[i])
                     out.append(_encrypt(self.key,xored,self.rounds/2,self.endian))
+
                 return "".join(out[1:])
+
             else:
                 raise ValueError("Input string must be a multiple of blocksize in length")
+
         #OFB
         elif self.mode == MODE_OFB:
             #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
@@ -167,11 +181,14 @@ class XTEACipher(object):
                 blocks = self._block(data)
                 out = []
                 fb = self.IV
+
                 for bn in blocks:
                     tx = _encrypt(self.key, fb, self.rounds/2, self.endian)
                     fb = xor_strings(bn, tx)
                     out.append(fb)
+
                 return "".join(out)
+
             else:
                 raise ValueError("Input string must be a multiple of blocksize in length")
 
@@ -181,8 +198,10 @@ class XTEACipher(object):
             
             blocks = self._block(data)
             out = []
+
             for block in blocks:
                 c = self.counter()
+
                 if type(c) in l:
                     warnings.warn(
                         "Numbers as counter-value is buggy and deprecated!",
@@ -201,6 +220,7 @@ class XTEACipher(object):
                             self.rounds/2,
                             self.endian)
                         )
+
             return "".join(out)
 
     def decrypt(self, data):
@@ -238,6 +258,7 @@ class XTEACipher(object):
                             blocks[i-1])
                         )
                 return "".join(out)
+
         #OFB
         elif self.mode == MODE_OFB:
             #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
@@ -254,6 +275,7 @@ class XTEACipher(object):
                     fb = block[:]
                     out.append(xor_strings(block,tx))
                 return "".join(out)
+
             else:
                 raise ValueError("Input string must be a multiple of blocksize in length")
 
@@ -276,9 +298,11 @@ class XTEACipher(object):
                             "Unable to decrypt this block, block is lost",
                             RuntimeWarning)
                         out.append("\00"*8)
+
                 else:
                     nc = _decrypt(self.key, block, self.rounds/2, self.endian)
                     out.append(xor_strings(nc, c))
+
             return "".join(out)
 
     def _ofb(self, data):
