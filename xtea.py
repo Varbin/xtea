@@ -175,6 +175,7 @@ class XTEACipher(object):
                     xored = xor_strings(blocks[i], out[i])
                     out.append(_encrypt(self.key,xored,self.rounds/2,self.endian))
 
+                self.IV = out[-1]
                 return "".join(out[1:])
 
             else:
@@ -239,6 +240,9 @@ class XTEACipher(object):
                                 self.endian),
                             blocks[i-1])
                         )
+
+                self.IV = blocks[-1]
+
                 return "".join(out)
 
         #OFB
