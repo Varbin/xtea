@@ -24,12 +24,13 @@ e5897bfd2450982379267e6cd7405b477ccc19d6c0d32e2f
 True
 """
 
-
+import array
 import struct
 import binascii
 import sys
 import warnings
 import types
+import os
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -140,6 +141,7 @@ class XTEACipher(object):
                                        self.rounds//2)
                     for k in self.IV:
                         yield ord(k)
+            self._keygen = keygen()
 
     def encrypt(self, data):
         """Encrypt data.
@@ -278,6 +280,58 @@ class XTEACipher(object):
         return l
 
 
+
+################ Basic counter for CTR mmode
+
+class Counter:
+    """Small counter for CTR mode, based on arrays
+    Example:
+    
+        >>> from xtea3 import Counter
+        >>> nonce = b"$2dUI84e" # This should be random
+        >>> c = Counter(nonce)
+        >>> c()
+        b'%2dUI84e'
+        >>> c()
+        b'&2dUI84e'
+        >>> c()
+        b"'2dUI84e"
+        >>> c.reset()
+        >>> c()
+        b'%2dUI84e'
+    """
+    
+    def __init__(self, nonce):
+        """Constructor for a counter which is suitable for CTR mode.
+        Args:
+            nonce (bytes): The start value, \
+            it MUST be random if it should be secure, for example, use *os.urandom* for it.
+        """
+
+        self.__nonce = nonce
+        self.reset()
+
+    def __call__(self):
+        """The method that makes it callable.
+        Returns:
+            bytes
+        """
+
+        for i in range(len(self.__current)):
+            try:
+                self.__current[i] += 1
+                break
+            except:
+                self.__current[i] = 0
+        return self.__current.tostring()
+    
+    def reset(self):
+        """Reset the counter to the nonce
+        """
+
+        self.__current = array.array("B", self.__nonce)
+
+
 ################ Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
 """
 This are utilities only, use them only if you know what you do.
@@ -355,110 +409,65 @@ def longToString(n):
 
 c = 0  # Test (double global)
 
+def _test_mode(mode):
+    plain = os.urandom(56)*8
+    counter = Counter(os.urandom(8))
+    key = os.urandom(16)
+    iv = os.urandom(8)
+    e = new(key, IV=iv, counter=counter, mode=mode)
+    encrypted = e.encrypt(plain)
+    d = new(key, IV=iv, counter=counter, mode=mode)
+    counter.reset()
+    decrypted = d.decrypt(encrypted)
+    if plain != decrypted:
+        raise Exception("Invalid decryption!")
+
 def _test():
     global c
     import os
     from time import clock
     print "Starting test..."
     print "Testing ECB"
-    fails_ecb = 0
+
     start = clock()
     for i in range(250):
-        try:
-            plain = os.urandom(56)*8
-            e = new(os.urandom(16))
-            encrypted = e.encrypt(plain)
-            decrypted = e.decrypt(encrypted)
-            if decrypted != plain: fails_ecb += 1
-        except:
-            print >> sys.stderr, "Fail with Error..."
-            fails_ecb+=1
+        _test_mode(MODE_ECB)
     end = clock()
     time_ecb = end - start
 
     print "Testing CBC"
-    fails_cbc = 0
     start = clock()
+
     for i in range(250):
-        try:
-            key = os.urandom(16)
-            iv = os.urandom(8)
-            c1 = new(key, mode=MODE_CBC, IV=iv)
-            c2 = new(key, mode=MODE_CBC, IV=iv)
-            plain = os.urandom(56)*8
-            encrypted = c1.encrypt(plain)
-            decrypted = c2.decrypt(encrypted)
-            if decrypted != plain: fails_cbc+=1
-            
-        except:
-            print >> sys.stderr, "Fail with Error..."
-            fails_cbc+=1
+       _test_mode(MODE_CBC)
+
     end = clock()
     time_cbc = end - start
 
     print "Testing CFB"
-    fails_cfb = 0
     start = clock()
+
     for i in range(250):
-        try:
-            key = os.urandom(16)
-            iv = os.urandom(8)
-            c1 = new(key, mode=MODE_CFB, IV=iv)
-            c2 = new(key, mode=MODE_CFB, IV=iv)
-            plain = os.urandom(56)*8
-            encrypted = c1.encrypt(plain)
-            decrypted = c2.decrypt(encrypted)
-            if decrypted != plain: fails_cfb+=1
-            
-        except:
-            print >> sys.stderr, "Fail with Error..."
-            fails_cfb+=1
+        _test_mode(MODE_CBC)
+
     end = clock()
     time_cfb = end - start
             
-    print "Testing OFB (function)"
-    fails_ofb = 0
+    print "Testing OFB"
     start = clock()
+
     for i in range(250):
-        try:
-            key = os.urandom(16)
-            plain = os.urandom(56)*8
-            encrypted = _crypt_ofb(key, plain)
-            decrypted = _crypt_ofb(key, encrypted)
-            if decrypted != plain:
-                fails_ofb+=1
-        except:
-            print >> sys.stderr, "Fail with Error..."
-            fails_ofb+=1
+        _test_mode(MODE_OFB)
+
     end = clock()
     time_ofb = end - start
     
-    print "Testing CTR (old number-counter)"
-    fails_ctr = 0
-    def count():
-        global c
-        c += 1
-        return c
+    print "Testing CTR"
     start = clock()
+
     for i in range(250):
-        try:
-            key = os.urandom(16)
-            c_b = stringToLong(os.urandom(6))
-            c=c_b
-            cf = new(key, mode=MODE_CTR, counter=count)
-            plain = os.urandom(56)*8
-            encrypted = cf.encrypt(plain)
-            c=c_b
-            decrypted = cf.decrypt(encrypted)
-            if decrypted != plain:
-                fails_ctr+=1
-        except Warning:
-            pass
-        except DeprecationWarning:
-            print "Outdated test function..."
-        except Exception:
-            print >> sys.stderr, "Fail with Error..."
-            fails_ctr += 1
+        _test_mode(MODE_CTR)
+
     end = clock()
     time_ctr = end - start
 
@@ -466,18 +475,6 @@ def _test():
     print
     print "Result"
     print "="*15
-    print
-    print
-    print "Fails:"
-    print
-    print "|ECB|CBC|CFB|OFB|CTR|"
-    print "|---|---|---|---|---|"
-    print "|%s|%s|%s|%s|%s|" % (
-        str(fails_ecb).rjust(3,"0"),
-        str(fails_cbc).rjust(3,"0"),
-        str(fails_cfb).rjust(3,"0"),
-        str(fails_ofb).rjust(3,"0"),
-        str(fails_ctr).rjust(3,"0"))
     print
     print "Time:"
     print
