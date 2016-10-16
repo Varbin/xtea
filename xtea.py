@@ -190,11 +190,10 @@ class XTEACipher(object):
             if not len(data) % self.block_size:
                 blocks = self._block(data)
                 out = []
-                fb = self.IV
 
-                for bn in blocks:
-                    tx = _encrypt(self.key, fb, self.rounds/2, self.endian)
-                    fb = xor_strings(bn, tx)
+                for block in blocks:
+                    tx = _encrypt(self.key, self.IV, self.rounds/2, self.endian)
+                    self.IV = xor_strings(block, tx)
                     out.append(fb)
 
                 return "".join(out)
@@ -252,10 +251,11 @@ class XTEACipher(object):
             if not len(data) % self.block_size:
                 blocks = self._block(data)
                 out = []
-                fb = self.IV
+
                 for block in blocks:
-                    tx = _encrypt(self.key, fb, self.rounds/2, self.endian)
-                    fb = block[:]
+                    tx = _encrypt(self.key, self.IV, self.rounds/2,
+                                  self.endian)
+                    self.IV = block[:]
                     out.append(xor_strings(block,tx))
                 return "".join(out)
 
