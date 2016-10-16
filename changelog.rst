@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+Version 0.6.0; Oct 16, 2016
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[0.6.0] Made Python 3 compatible | removed counters can return integers | cipher objects remember state
+
+ - Python 3 does work now
+ - [BREAKING CHANGE] counters cannot return numbers any more, they must return bytestrings now
+ - [BREAKING CHANGE] Cipher objects remember change, so two consecutive calls to XTEA.encrypt should not return the same
+ - improved documentation
+
 Version 0.5.0; Oct 15, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -18,7 +28,7 @@ Version 0.4.0; Jul 12, 2014
 
  - CTR mode works with strings now
  - raises DeprecatedWarning if a number is returned
- - CBCMAC class added (use static method CBCMAC.new(args) to generate)
+ - CBCMAC class added (use static method CBCMAC.new(args) to create)
 
 Version 0.3.2; Jul 11, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

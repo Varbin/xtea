@@ -62,16 +62,46 @@ key_size = 128
 
 
 def new(key, **kwargs):
-    """Create an cipher object.
+    """Create an "XTEACipher" object.
+    It fully PEP-272 comliant, default mode is ECB.
+    Args:
+        key (bytes): The key for encrytion/decryption. Must be 16 in length
 
-    Keyword arguments
-    key -- the key for encrypting (and decrypting)
+    Kwargs:
 
-    Other arguments:
-    mode -- Block cipher mode of operation (default MODE_ECB)
-    IV -- Initialisation vector (needed with CBC/CFB)
-    counter -- a callable counter (needed with CTR)
-    endian -- how to use struct (default "!" (big endian/network))    """
+        mode (int): Mode of operation, must be one of this::
+            1 = ECB
+            2 = CBC
+            3 = CFB
+            5 = OFB
+            6 = CTR
+        
+        IV (bytes): Initialisation vector (needed with CBC/CFB).
+            Must be 8 in length.
+        
+        counter (callable object): a callable counter wich returns bytestrings
+
+
+            .. versionchanged:: 0.5.0
+               Only bytestrings can be used, previously integers were allowed,
+               too.
+        
+        endian (char / string):
+            how data is beeing extracted (default "!" = big endian)
+            ..seealso:: modules :py:mod:`struct`
+
+        rounds (int / float): How many rounds are going to be used,
+            one round are two cycles, there are no *half* cycles.
+            The minimum secure rounds are 37 (default 64)
+
+    Raises:
+        ValueError if invalid/not all data is given.
+        NotImplementedError on MODE_PGP
+
+    Returns:
+       XTEACipher object
+
+    """
     return XTEACipher(key, **kwargs)
 
 ################ XTEACipher class
@@ -99,8 +129,40 @@ class XTEACipher(object):
     counter = None
     
     def __init__(self, key, **kwargs):
-        """Initiate the cipher
-        same arguments as for new."""
+        """\
+        Alternative constructor.
+        Create an cipher object.
+
+        Args:
+            key (bytes): The key for encrytion/decryption. Must be 16 in length
+
+        Kwargs:
+            mode (int): Mode of operation, must be one of this::
+
+                1 = ECB
+                2 = CBC
+                3 = CFB
+                5 = OFB
+                6 = CTR
+
+            IV (bytes): Initialisation vector (needed with CBC/CFB).
+                Must be 8 in length.
+
+            counter (callable object): a callable counter wich returns bytes
+                or int (needed with CTR)
+      
+            endian (char / string):
+                how data is beeing extracted (default "!")
+                ..seealso:: modules :py:mod:`struct`
+
+        Raises:
+            ValueError if invalid/not all required data is give.
+            NotImplementedError on MODE_PGP.
+
+        Creates:
+            XTEACipher object
+
+        """
 
         self.key = key
         if len(key) != key_size/8: # Check key len
@@ -159,12 +221,17 @@ class XTEACipher(object):
             self._keygen = keygen()
 
     def encrypt(self, data):
-        """Encrypt data.
+        """\
+        Encrypt data, it must be a multiple of 8 in length except for
+        CTR and OFB mode of operation. When using the OFB or CTR mode, the
+        function for encryption and decryption is the same.
 
-        Keyword arguments:
-        data -- the data (plaintext) to encrypt
-
-        On OFB, encrypt and decrypt is the same.
+        Args:
+            data (bytes): The data to encrypt.
+        Returns:
+            bytestrings
+        Raises:
+            ValueError
         """
 
         #ECB
@@ -225,12 +292,17 @@ class XTEACipher(object):
             return self._stream(data)
 
     def decrypt(self, data):
-        """Decrypt data.
+        """\
+        Decrypt data, it must be a multiple of 8 in length except for
+        CTR and OFB mode of operation. When using the OFB or CTR mode, the
+        function for encryption and decryption is the same.
 
-        Keyword arguments:
-        data -- the data (ciphertext) to decrypt.
-
-        On OFB, encrypt and decrypt is the same.
+        Args:
+            data (bytes): The data to decrypt.
+        Returns:
+            bytestrings
+        Raises:
+            ValueError
         """
         #ECB
         if self.mode == MODE_ECB:
@@ -433,7 +505,7 @@ else:
 
 def stringToLong(s):
     """Convert any string to a number."""
-    return long(binascii.hexlify(s),16)
+    return int(binascii.hexlify(s),16)
 
 def longToString(n):
     """Convert some longs to string."""
