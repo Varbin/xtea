@@ -31,7 +31,6 @@ import struct
 import binascii
 import sys
 import warnings
-import types
 import os
 
 MODE_ECB = 1
@@ -510,83 +509,3 @@ def stringToLong(s):
 def longToString(n):
     """Convert some longs to string."""
     return binascii.unhexlify("%x" % n)
-
-c = 0  # Test (double global)
-
-def _test_mode(mode):
-    plain = os.urandom(56)*8
-    counter = Counter(os.urandom(8))
-    key = os.urandom(16)
-    iv = os.urandom(8)
-    e = new(key, IV=iv, counter=counter, mode=mode)
-    encrypted = e.encrypt(plain)
-    d = new(key, IV=iv, counter=counter, mode=mode)
-    counter.reset()
-    decrypted = d.decrypt(encrypted)
-    if plain != decrypted:
-        raise Exception("Invalid decryption!")
-
-def _test():
-    from time import clock
-
-    print("Starting test...")
-    print("Testing ECB")
-
-    start = clock()
-    for i in range(250):
-        _test_mode(MODE_ECB)
-    end = clock()
-    time_ecb = end - start
-
-    print("Testing CBC")
-    start = clock()
-
-    for i in range(250):
-       _test_mode(MODE_CBC)
-
-    end = clock()
-    time_cbc = end - start
-
-    print("Testing CFB")
-    start = clock()
-
-    for i in range(250):
-        _test_mode(MODE_CBC)
-
-    end = clock()
-    time_cfb = end - start
-            
-    print("Testing OFB")
-    start = clock()
-
-    for i in range(250):
-        _test_mode(MODE_OFB)
-
-    end = clock()
-    time_ofb = end - start
-    
-    print("Testing CTR")
-    start = clock()
-
-    for i in range(250):
-        _test_mode(MODE_CTR)
-
-    end = clock()
-    time_ctr = end - start
-
-    print()
-    print()
-    print("Result")
-    print("="*15)
-    print()
-    print("Time:")
-    print()
-    print("ECB: %s\nCBC: %s\nCFB: %s\nOFB: %s\nCTR: %s\n" % (
-        str(time_ecb),
-        str(time_cbc),
-        str(time_cfb),
-        str(time_ofb),
-        str(time_ctr)))
-
-if __name__ == "__main__":
-    _test()
