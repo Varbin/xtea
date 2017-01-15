@@ -3,7 +3,8 @@ import os
 
 from time import clock
 
-from xtea import Counter, MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, XTEACipher
+from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, XTEACipher
+from counter import Counter
 
 def _test_mode(mode):
     plain = os.urandom(56)*8
@@ -21,7 +22,7 @@ def _test_mode(mode):
     if plain != decrypted:
         raise Exception("Invalid decryption!")
 
-class Test(unittest.TestCase):
+class TestModes(unittest.TestCase):
     def testECB(self):
         print("Testing ECB")
     
