@@ -1,5 +1,4 @@
 ################ Basic counter for CTR mode
-import array
 import sys
 import struct
 
@@ -23,10 +22,15 @@ else:
             raise ValueError("byteorder must be either 'little' or 'big'")
 
     def from_bytes(bytesarray, byteorder):
+        if len(bytesarray) == 4:
+            size = 'L'
+        elif len(bytesarray) == 8:
+            size = 'Q'
+            
         if byteorder=='big':
-            return struct.unpack(">L", bytesarray)[0]
+            return struct.unpack(">"+size, bytesarray)[0]
         elif byteorder=='little':
-            return struct.unpack("<L", bytesarray)[0]
+            return struct.unpack("<"+size, bytesarray)[0]
         else:
             raise ValueError("byteorder must be either 'little' or 'big'")
 
@@ -64,17 +68,13 @@ class Counter:
         Returns:
             bytes
         """
-
-        for i in range(len(self.__current)):
-            try:
-                self.__current[i] += 1
-                break
-            except:
-                self.__current[i] = 0
-        return self.__current.tostring()
+        
+        value = to_bytes(self.__current, 8, self.byteorder)
+        self.__current += 1
+        return value
     
     def reset(self):
         """Reset the counter to the nonce
         """
 
-        self.__current = array.array("B", self.__nonce)
+        self.__current = from_bytes(self.__nonce, self.byteorder)

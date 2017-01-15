@@ -36,9 +36,9 @@ class TestBytesToInt(unittest.TestCase):
     
 class TestCounter(unittest.TestCase):
     
-    def testCountUp(self):
+    def testLittleEndian(self):
         pass
     
-    def testCountDown(self):
+    def testBigEndian(self):
         pass
 
