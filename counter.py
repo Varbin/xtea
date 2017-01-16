@@ -78,3 +78,4 @@ class Counter:
         """
 
         self.__current = from_bytes(self.__nonce, self.byteorder)
+

@@ -37,8 +37,12 @@ class TestBytesToInt(unittest.TestCase):
 class TestCounter(unittest.TestCase):
     
     def testLittleEndian(self):
-        pass
+        counter = Counter(b'\x00\x00\x00\x00\x00\x00\x00\x00', 'little')
+        self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.assertEqual(counter(), b'\x01\x00\x00\x00\x00\x00\x00\x00')
     
     def testBigEndian(self):
-        pass
+        counter = Counter(b'\x00\x00\x00\x00\x00\x00\x00\x00', 'big')
+        self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x01')
 
