@@ -71,6 +71,7 @@ class Counter:
         
         value = to_bytes(self.__current, 8, self.byteorder)
         self.__current += 1
+        self.__current %= 2**64
         return value
     
     def reset(self):

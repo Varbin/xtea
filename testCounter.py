@@ -45,4 +45,9 @@ class TestCounter(unittest.TestCase):
         counter = Counter(b'\x00\x00\x00\x00\x00\x00\x00\x00', 'big')
         self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x00')
         self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x01')
+        
+    def testMaxValue(self):
+        counter = Counter(b'\xff\xff\xff\xff\xff\xff\xff\xff', 'little')
+        self.assertEqual(counter(), b'\xff\xff\xff\xff\xff\xff\xff\xff')
+        self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x00')
 
