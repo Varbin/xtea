@@ -26,13 +26,10 @@ True
 
 from __future__ import print_function
 
-import array
 import struct
 import binascii
 import sys
 import warnings
-import types
-import os
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -120,7 +117,7 @@ class XTEACipher(object):
 
     Variables:
     IV -- the initialisation vector (default None or "\00"*8)
-    conuter -- counter for CTR (default None)
+    counter -- counter for CTR (default None)
     
     """
     
@@ -375,58 +372,6 @@ class XTEACipher(object):
         return l
 
 
-
-################ Basic counter for CTR mmode
-
-class Counter:
-    """Small counter for CTR mode, based on arrays
-    Example:
-    
-        >>> from xtea3 import Counter
-        >>> nonce = b"$2dUI84e" # This should be random
-        >>> c = Counter(nonce)
-        >>> c()
-        b'%2dUI84e'
-        >>> c()
-        b'&2dUI84e'
-        >>> c()
-        b"'2dUI84e"
-        >>> c.reset()
-        >>> c()
-        b'%2dUI84e'
-    """
-    
-    def __init__(self, nonce):
-        """Constructor for a counter which is suitable for CTR mode.
-        Args:
-            nonce (bytes): The start value, \
-            it MUST be random if it should be secure, for example, use *os.urandom* for it.
-        """
-
-        self.__nonce = nonce
-        self.reset()
-
-    def __call__(self):
-        """The method that makes it callable.
-        Returns:
-            bytes
-        """
-
-        for i in range(len(self.__current)):
-            try:
-                self.__current[i] += 1
-                break
-            except:
-                self.__current[i] = 0
-        return self.__current.tostring()
-    
-    def reset(self):
-        """Reset the counter to the nonce
-        """
-
-        self.__current = array.array("B", self.__nonce)
-
-
 ################ Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
 """
 This are utilities only, use them only if you know what you do.
@@ -510,83 +455,3 @@ def stringToLong(s):
 def longToString(n):
     """Convert some longs to string."""
     return binascii.unhexlify("%x" % n)
-
-c = 0  # Test (double global)
-
-def _test_mode(mode):
-    plain = os.urandom(56)*8
-    counter = Counter(os.urandom(8))
-    key = os.urandom(16)
-    iv = os.urandom(8)
-    e = new(key, IV=iv, counter=counter, mode=mode)
-    encrypted = e.encrypt(plain)
-    d = new(key, IV=iv, counter=counter, mode=mode)
-    counter.reset()
-    decrypted = d.decrypt(encrypted)
-    if plain != decrypted:
-        raise Exception("Invalid decryption!")
-
-def _test():
-    from time import clock
-
-    print("Starting test...")
-    print("Testing ECB")
-
-    start = clock()
-    for i in range(250):
-        _test_mode(MODE_ECB)
-    end = clock()
-    time_ecb = end - start
-
-    print("Testing CBC")
-    start = clock()
-
-    for i in range(250):
-       _test_mode(MODE_CBC)
-
-    end = clock()
-    time_cbc = end - start
-
-    print("Testing CFB")
-    start = clock()
-
-    for i in range(250):
-        _test_mode(MODE_CBC)
-
-    end = clock()
-    time_cfb = end - start
-            
-    print("Testing OFB")
-    start = clock()
-
-    for i in range(250):
-        _test_mode(MODE_OFB)
-
-    end = clock()
-    time_ofb = end - start
-    
-    print("Testing CTR")
-    start = clock()
-
-    for i in range(250):
-        _test_mode(MODE_CTR)
-
-    end = clock()
-    time_ctr = end - start
-
-    print()
-    print()
-    print("Result")
-    print("="*15)
-    print()
-    print("Time:")
-    print()
-    print("ECB: %s\nCBC: %s\nCFB: %s\nOFB: %s\nCTR: %s\n" % (
-        str(time_ecb),
-        str(time_cbc),
-        str(time_cfb),
-        str(time_ofb),
-        str(time_ctr)))
-
-if __name__ == "__main__":
-    _test()

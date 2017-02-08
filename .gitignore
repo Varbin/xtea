@@ -11,6 +11,9 @@ egg/
 # Sometimes they are there...
 *.egg
 
+.project
+.pydevproject
+
 #Minimal Jython install for uploading and testing
 jython.bat
 jython.jar
