@@ -53,6 +53,37 @@ else:
     def b_chr(n):
         return chr(n)
 
+PY_3 = sys.version_info.major >= 3
+
+if PY_3:
+    def to_bytes(integer, length, byteorder):
+        return integer.to_bytes(length, byteorder)
+
+    def from_bytes(bytesarray, byteorder):
+        return int.from_bytes(bytesarray, byteorder)
+else:
+    def to_bytes(integer, length, byteorder='big'):
+        h = '%x' % integer    
+        s = ('0'*(len(h) % 2) + h).zfill(length*2).decode('hex')
+        if byteorder == 'big':
+            return s 
+        elif byteorder =='little':
+            return s[::-1]
+        else:
+            raise ValueError("byteorder must be either 'little' or 'big'")
+
+    def from_bytes(bytesarray, byteorder):
+        if len(bytesarray) == 4:
+            size = 'L'
+        elif len(bytesarray) == 8:
+            size = 'Q'
+            
+        if byteorder=='big':
+            return struct.unpack(">"+size, bytesarray)[0]
+        elif byteorder=='little':
+            return struct.unpack("<"+size, bytesarray)[0]
+        else:
+            raise ValueError("byteorder must be either 'little' or 'big'")
 
 block_size = 64
 key_size = 128
