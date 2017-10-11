@@ -40,5 +40,7 @@ setup(name='xtea',
         "Programming Language :: Python :: Implementation :: Jython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Security",
-	"Topic :: Security :: Cryptography"]
+	"Topic :: Security :: Cryptography"],
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest']
       )
