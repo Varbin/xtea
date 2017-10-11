@@ -41,12 +41,14 @@ MODE_CTR = 6
 PY_3 = sys.version_info.major >= 3
 
 if PY_3:
+
     def b_ord(n):
         return n
 
     def b_chr(n):
         return bytes([n])
 else:
+
     def b_ord(n):
         return ord(n)
 
@@ -101,7 +103,9 @@ def new(key, **kwargs):
     """
     return XTEACipher(key, **kwargs)
 
+
 ################ XTEACipher class
+
 
 class XTEACipher(object):
     """The cipher class
@@ -120,11 +124,11 @@ class XTEACipher(object):
     counter -- counter for CTR (default None)
     
     """
-    
+
     block_size = 8
     IV = None
     counter = None
-    
+
     def __init__(self, key, **kwargs):
         """\
         Alternative constructor.
@@ -162,59 +166,63 @@ class XTEACipher(object):
         """
 
         self.key = key
-        if len(key) != key_size/8: # Check key len
+        if len(key) != key_size / 8:  # Check key len
             raise ValueError("Key must be 128 bit long")
 
-        keys = kwargs.keys() # arguments
+        keys = kwargs.keys()  # arguments
 
-        if "mode" in keys: # check for mode
-            self.mode = kwargs["mode"] # read mode
+        if "mode" in keys:  # check for mode
+            self.mode = kwargs["mode"]  # read mode
         else:
-            self.mode = MODE_ECB # if not given
+            self.mode = MODE_ECB  # if not given
             warnings.warn("Using implicit ECB!")
 
-        if self.mode == MODE_PGP: 
+        if self.mode == MODE_PGP:
             raise NotImplementedError("PGP-CFB is not implemented")
 
-        if "IV" in keys: # get iv
+        if "IV" in keys:  # get iv
             self.IV = kwargs["IV"]
-            if len(self.IV) != self.block_size: # iv len = blocksize
+            if len(self.IV) != self.block_size:  # iv len = blocksize
                 raise ValueError("IV must be 8 bytes long")
-        elif self.mode == MODE_CBC or self.mode == MODE_CFB: # cfb & cbc need iv
+        elif self.mode == MODE_CBC or self.mode == MODE_CFB:  # cfb & cbc need iv
             raise ValueError("CBC, CFB need an IV")
-        elif self.mode == MODE_OFB: # ofb nocne if not given = "\x00" * 16
+        elif self.mode == MODE_OFB:  # ofb nocne if not given = "\x00" * 16
             self.IV = '\00\00\00\00\00\00\00\00'
 
-        if "counter" in keys: # ctr needs counter
+        if "counter" in keys:  # ctr needs counter
             self.counter = kwargs["counter"]
-        elif self.mode == MODE_CTR: # if ctr and counter not given
+        elif self.mode == MODE_CTR:  # if ctr and counter not given
             raise ValueError("CTR needs a counter")
 
-        if "rounds" in keys: # rounds to operate
+        if "rounds" in keys:  # rounds to operate
             self.rounds = kwargs["rounds"]
         else:
             self.rounds = 64
 
-        if "endian" in keys: # endian for struct str -> int -> str (byte order)
+        if "endian" in keys:  # endian for struct str -> int -> str (byte order)
             self.endian = kwargs["endian"]
         else:
-            self.endian = "!" # default network/big endian
+            self.endian = "!"  # default network/big endian
 
         if self.mode == MODE_OFB:
+
             def keygen():
                 while True:
-                    self.IV = _encrypt(self.key,self.IV,self.rounds//2)
+                    self.IV = _encrypt(self.key, self.IV, self.rounds // 2)
                     for k in self.IV:
                         yield b_ord(k)
+
             self._keygen = keygen()
 
         elif self.mode == MODE_CTR:
+
             def keygen():
                 while True:
-                    self.IV = _encrypt(self.key, self.counter(),
-                                       self.rounds//2)
+                    self.IV = _encrypt(self.key,
+                                       self.counter(), self.rounds // 2)
                     for k in self.IV:
                         yield b_ord(k)
+
             self._keygen = keygen()
 
     def encrypt(self, data):
@@ -235,32 +243,36 @@ class XTEACipher(object):
         if self.mode == MODE_ECB:
             if not len(data) % (self.block_size):
                 out = []
-                blocks=self._block(data)
+                blocks = self._block(data)
 
                 for block in blocks:
-                    out.append(_encrypt(self.key, block, self.rounds//2,
-                                        self.endian))
+                    out.append(
+                        _encrypt(self.key, block, self.rounds // 2,
+                                 self.endian))
 
                 return b"".join(out)
             else:
-                raise ValueError("Input string must be a multiple of blocksize in length")
+                raise ValueError(
+                    "Input string must be a multiple of blocksize in length")
 
         #CBC
         elif self.mode == MODE_CBC:
             if not len(data) % (self.block_size):
                 out = [self.IV]
-                blocks=self._block(data)
+                blocks = self._block(data)
 
                 for i in range(0, len(blocks)):
                     xored = xor_strings(blocks[i], out[i])
-                    out.append(_encrypt(self.key,xored,self.rounds//2,
-                                        self.endian))
+                    out.append(
+                        _encrypt(self.key, xored, self.rounds // 2,
+                                 self.endian))
 
                 self.IV = out[-1]
                 return b"".join(out[1:])
 
             else:
-                raise ValueError("Input string must be a multiple of blocksize in length")
+                raise ValueError(
+                    "Input string must be a multiple of blocksize in length")
 
         #OFB
         elif self.mode == MODE_OFB:
@@ -274,7 +286,7 @@ class XTEACipher(object):
                 out = []
 
                 for block in blocks:
-                    tx = _encrypt(self.key, self.IV, self.rounds//2,
+                    tx = _encrypt(self.key, self.IV, self.rounds // 2,
                                   self.endian)
                     self.IV = xor_strings(block, tx)
                     out.append(fb)
@@ -282,7 +294,8 @@ class XTEACipher(object):
                 return b"".join(out)
 
             else:
-                raise ValueError("Input string must be a multiple of blocksize in length")
+                raise ValueError(
+                    "Input string must be a multiple of blocksize in length")
 
         #CTR
         elif self.mode == MODE_CTR:
@@ -305,29 +318,27 @@ class XTEACipher(object):
         if self.mode == MODE_ECB:
             if not (len(data) % self.block_size):
                 out = []
-                blocks=self._block(data)
+                blocks = self._block(data)
                 for block in blocks:
-                    out.append(_decrypt(self.key, block, self.rounds//2,
-                                        self.endian))
+                    out.append(
+                        _decrypt(self.key, block, self.rounds // 2,
+                                 self.endian))
                 return b"".join(out)
             else:
-                raise ValueError("Input string must be a multiple of blocksize in length")
+                raise ValueError(
+                    "Input string must be a multiple of blocksize in length")
 
         #CBC
         elif self.mode == MODE_CBC:
             if not (len(data) % self.block_size):
                 out = []
                 blocks = self._block(data)
-                blocks = [self.IV]+blocks
+                blocks = [self.IV] + blocks
                 for i in range(1, len(blocks)):
                     out.append(
                         xor_strings(
-                            _decrypt(
-                                self.key,blocks[i]
-                                ,self.rounds//2,
-                                self.endian),
-                            blocks[i-1])
-                        )
+                            _decrypt(self.key, blocks[i], self.rounds // 2,
+                                     self.endian), blocks[i - 1]))
 
                 self.IV = blocks[-1]
 
@@ -345,28 +356,29 @@ class XTEACipher(object):
                 out = []
 
                 for block in blocks:
-                    tx = _encrypt(self.key, self.IV, self.rounds//2,
+                    tx = _encrypt(self.key, self.IV, self.rounds // 2,
                                   self.endian)
                     self.IV = block[:]
-                    out.append(xor_strings(block,tx))
+                    out.append(xor_strings(block, tx))
                 return b"".join(out)
 
             else:
-                raise ValueError("Input string must be a multiple of blocksize in length")
+                raise ValueError(
+                    "Input string must be a multiple of blocksize in length")
 
         #CTR
         elif self.mode == MODE_CTR:
             return self._stream(data)
 
     def _stream(self, data):
-        xor = [ b_chr(x^y) for (x,y) in zip(map(b_ord,data),self._keygen) ]
+        xor = [b_chr(x ^ y) for (x, y) in zip(map(b_ord, data), self._keygen)]
         return b"".join(xor)
 
     def _block(self, s):
         l = []
         rest_size = len(s) % self.block_size
-        for i in range(len(s)//self.block_size):
-            l.append(s[i*self.block_size:((i+1)*self.block_size)])
+        for i in range(len(s) // self.block_size):
+            l.append(s[i * self.block_size:((i + 1) * self.block_size)])
         if rest_size:
             raise ValueError()
         return l
@@ -385,7 +397,7 @@ longToString --Convert some longs to string.
 """
 
 
-def _encrypt(key,block,n=32,endian="!"):
+def _encrypt(key, block, n=32, endian="!"):
     """Encrypt one single block of data.
 
     Only use if you know what to do.
@@ -397,16 +409,18 @@ def _encrypt(key,block,n=32,endian="!"):
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
-    v0,v1 = struct.unpack(endian+"2L",block)
-    k = struct.unpack(endian+"4L",key)
-    sum,delta,mask = 0, 0x9e3779b9, 0xffffffff
+    v0, v1 = struct.unpack(endian + "2L", block)
+    k = struct.unpack(endian + "4L", key)
+    sum, delta, mask = 0, 0x9e3779b9, 0xffffffff
     for round in range(n):
-        v0 = (v0 + (((v1<<4 ^ v1>>5) + v1) ^ (sum + k[sum & 3]))) & mask
+        v0 = (v0 + (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
         sum = (sum + delta) & mask
-        v1 = (v1 + (((v0<<4 ^ v0>>5) + v0) ^ (sum + k[sum>>11 & 3]))) & mask
-    return struct.pack(endian+"2L",v0,v1)
+        v1 = (v1 +
+              (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
+    return struct.pack(endian + "2L", v0, v1)
 
-def _decrypt(key,block,n=32,endian="!"):
+
+def _decrypt(key, block, n=32, endian="!"):
     """Decrypt one single block of data.
 
     Only use if you know what to do.
@@ -418,39 +432,44 @@ def _decrypt(key,block,n=32,endian="!"):
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
-    v0,v1 = struct.unpack(endian+"2L",block)
-    k = struct.unpack(endian+"4L",key)
-    delta,mask = 0x9e3779b9,0xffffffff
+    v0, v1 = struct.unpack(endian + "2L", block)
+    k = struct.unpack(endian + "4L", key)
+    delta, mask = 0x9e3779b9, 0xffffffff
     sum = (delta * n) & mask
     for round in range(n):
-        v1 = (v1 - (((v0<<4 ^ v0>>5) + v0) ^ (sum + k[sum>>11 & 3]))) & mask
+        v1 = (v1 -
+              (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
         sum = (sum - delta) & mask
-        v0 = (v0 - (((v1<<4 ^ v1>>5) + v1) ^ (sum + k[sum & 3]))) & mask
-    return struct.pack(endian+"2L",v0,v1)
+        v0 = (v0 - (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
+    return struct.pack(endian + "2L", v0, v1)
+
 
 if PY_3:
-    def xor_strings(s,t):
+
+    def xor_strings(s, t):
         """xor to strings together.
 
         Keyword arguments:
         s -- string one
         t -- string two
         """
-        return bytes([(x^y) for x,y in zip(s,t)])
+        return bytes([(x ^ y) for x, y in zip(s, t)])
 else:
-    def xor_strings(s,t):
+
+    def xor_strings(s, t):
         """xor to strings together.
 
         Keyword arguments:
         s -- string one
         t -- string two
         """
-        return "".join(chr(ord(x)^ord(y)) for x,y in zip(s,t))
+        return "".join(chr(ord(x) ^ ord(y)) for x, y in zip(s, t))
 
 
 def stringToLong(s):
     """Convert any string to a number."""
-    return int(binascii.hexlify(s),16)
+    return int(binascii.hexlify(s), 16)
+
 
 def longToString(n):
     """Convert some longs to string."""
