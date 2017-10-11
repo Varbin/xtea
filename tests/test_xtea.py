@@ -24,7 +24,7 @@ def _test_mode(mode):
     counter.reset()
     decrypted = d.decrypt(encrypted)
     if plain != decrypted:
-        raise Exception("Invalid decryption!")
+        raise AssertionError("Invalid decryption!")
 
 class TestModes(unittest.TestCase):
     def testECB(self):
