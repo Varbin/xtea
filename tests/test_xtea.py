@@ -4,7 +4,7 @@ import os
 from time import clock
 
 from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, XTEACipher
-from counter import Counter
+from xtea.counter import Counter
 
 def _test_mode(mode):
     plain = os.urandom(56)*8
