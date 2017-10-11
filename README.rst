@@ -25,5 +25,6 @@ Example:
 Note
 ====
    
-    I does NOT guarantee that this implementation (or the base cipher) is secure. If there are bugs, tell me them please. 
+    I do NOT guarantee that this implementation (or the base cipher) is secure. If you find bugs, please report them at
+    https://github.com/Varbin/xtea/issues . 
 
