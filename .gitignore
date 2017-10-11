@@ -17,3 +17,6 @@ egg/
 #Minimal Jython install for uploading and testing
 jython.bat
 jython.jar
+
+# Cache
+.cache/
