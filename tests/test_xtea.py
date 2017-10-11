@@ -6,6 +6,10 @@ from time import clock
 from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, XTEACipher
 from xtea.counter import Counter
 
+
+AMOUNT = 50
+
+
 def _test_mode(mode):
     plain = os.urandom(56)*8
     counter = Counter(os.urandom(8))
@@ -27,7 +31,7 @@ class TestModes(unittest.TestCase):
         print("Testing ECB")
     
         start = clock()
-        for i in range(250):
+        for i in range(AMOUNT):
             _test_mode(MODE_ECB)
         end = clock()
         time = end - start
@@ -37,7 +41,7 @@ class TestModes(unittest.TestCase):
         print("Testing CBC")
         start = clock()
     
-        for i in range(250):
+        for i in range(AMOUNT):
             _test_mode(MODE_CBC)
     
         end = clock()
@@ -48,7 +52,7 @@ class TestModes(unittest.TestCase):
         print("Testing CFB")
         start = clock()
     
-        for i in range(250):
+        for i in range(AMOUNT):
             _test_mode(MODE_CBC)
     
         end = clock()
@@ -59,7 +63,7 @@ class TestModes(unittest.TestCase):
         print("Testing OFB")
         start = clock()
     
-        for i in range(250):
+        for i in range(AMOUNT):
             _test_mode(MODE_OFB)
     
         end = clock()
@@ -70,7 +74,7 @@ class TestModes(unittest.TestCase):
         print("Testing CTR")
         start = clock()
     
-        for i in range(250):
+        for i in range(AMOUNT):
             _test_mode(MODE_CTR)
     
         end = clock()
