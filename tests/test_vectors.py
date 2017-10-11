@@ -15,11 +15,6 @@ def _unwrap(s):
     return unhexlify(s.replace(' ',''))
 
 
-if not __debug__:
-    raise Exception("This script uses assert for tests. "
-                    "Do use not -O or -OO to run it.")
-
-
 TEST_VECTORS = [
     {
         'k': '27f917b1 c1da8993 60e2acaa a6eb923d',
@@ -92,5 +87,8 @@ def test_decryption():
 
 
 if __name__ == "__main__":
+    if not __debug__:
+        raise Exception("This script uses \"assert\" for tests. "
+                        "Do not -O or -OO to run it.")
     test_encryption()
     test_decryption()
