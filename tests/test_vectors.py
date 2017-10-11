@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-
 """
 Testvectors for XTEA found at:
  - http://www.tayloredge.com/reference/Mathematics/XTEA.pdf
  
 """
 
-
 import xtea
 from binascii import hexlify
 from binascii import unhexlify
 
+
 def _unwrap(s):
-    return unhexlify(s.replace(' ',''))
+    return unhexlify(s.replace(' ', ''))
 
 
 TEST_VECTORS = [
@@ -21,7 +20,6 @@ TEST_VECTORS = [
         'p': 'af20a390 547571aa',
         'c': 'd26428af 0a202283'
     },
-
     {
         'k': '31415926 53589793 23846264 33832795',
         'p': '02884197 16939937',  # 48 digits of PI
@@ -66,7 +64,7 @@ def test_encryption():
             print("Expected %s, got %s!" % (hexlify(c).decode(),
                                             hexlify(r).decode()))
             raise
-            
+
 
 def test_decryption():
     for i in range(len(TEST_VECTORS)):
