@@ -1,18 +1,27 @@
 Changelog
 ---------
 
-Version 0.6.0; Oct 16, 2016
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(dev) Version 0.6.1; ...
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+[0.6.1] Improved tests | PEP8 | bugfixing
+
+ - PEP8-style formatting
+ - Unittests: Counter, modes (but not results of them!), test vectors
+ - [BREAKING CHANGE] Counter class is now in xtea.counter
+
+(unreleased) Version 0.6.0; Oct 16, 2016
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [0.6.0] Made Python 3 compatible | removed counters can return integers | cipher objects remember state
 
  - Python 3 does work now
  - [BREAKING CHANGE] counters cannot return numbers any more, they must return bytestrings now
- - [BREAKING CHANGE] Cipher objects remember change, so two consecutive calls to XTEA.encrypt should not return the same
+ - [BREAKING CHANGE] Cipher objects remember state, so two consecutive calls to XTEA.encrypt should not return the same
  - improved documentation
 
-Version 0.5.0; Oct 15, 2016
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(unreleased) Version 0.5.0; Oct 15, 2016
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [0.5.0] Removed CBCMAC
 
