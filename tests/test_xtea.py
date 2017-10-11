@@ -31,7 +31,7 @@ class TestModes(unittest.TestCase):
             _test_mode(MODE_ECB)
         end = clock()
         time = end - start
-        print("Time: %s" % str(time))
+        print("Time: %s" % str(round(time, 3)))
         
     def testCBC(self):
         print("Testing CBC")
@@ -42,7 +42,7 @@ class TestModes(unittest.TestCase):
     
         end = clock()
         time = end - start
-        print("Time: %s" % str(time))
+        print("Time: %s" % str(round(time, 3)))
         
     def testCFB(self):
         print("Testing CFB")
@@ -53,7 +53,7 @@ class TestModes(unittest.TestCase):
     
         end = clock()
         time = end - start
-        print("Time: %s" % str(time))
+        print("Time: %s" % str(round(time, 3)))
 
     def testOFB(self):
         print("Testing OFB")
@@ -64,7 +64,7 @@ class TestModes(unittest.TestCase):
     
         end = clock()
         time = end - start
-        print("Time: %s" % str(time))
+        print("Time: %s" % str(round(time, 3)))
 
     def testCTR(self):
         print("Testing CTR")
@@ -75,4 +75,8 @@ class TestModes(unittest.TestCase):
     
         end = clock()
         time = end - start
-        print("Time: %s" % str(time))
+        print("Time: %s" % str(round(time, 3)))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -51,3 +51,6 @@ class TestCounter(unittest.TestCase):
         self.assertEqual(counter(), b'\xff\xff\xff\xff\xff\xff\xff\xff')
         self.assertEqual(counter(), b'\x00\x00\x00\x00\x00\x00\x00\x00')
 
+
+if __name__ == "__main__":
+    unittest.main()
