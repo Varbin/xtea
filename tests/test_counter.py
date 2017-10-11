@@ -5,12 +5,12 @@ from xtea.counter import Counter, to_bytes, from_bytes
 class TestIntToBytes(unittest.TestCase):
 
     def testLittleEndian(self):
-        result = to_bytes(67305985, 4, 'little')
+        result = to_bytes(0x04030201, 4, 'little')
         expected = b'\x01\x02\x03\x04'
         self.assertEqual(result, expected)
             
     def testBigEndian(self):
-        result = to_bytes(16909060, 4, 'big')
+        result = to_bytes(0x01020304, 4, 'big')
         expected = b'\x01\x02\x03\x04'
         self.assertEqual(result, expected)
     
@@ -22,12 +22,12 @@ class TestBytesToInt(unittest.TestCase):
 
     def testLittleEndian(self):
         result = from_bytes(b'\x01\x02\x03\x04', 'little')
-        expected = 67305985
+        expected = 0x04030201
         self.assertEqual(result, expected)
     
     def testBigEndian(self):
         result = from_bytes(b'\x01\x02\x03\x04', 'big')
-        expected = 16909060
+        expected = 0x01020304
         self.assertEqual(result, expected)
     
     def testStrangeByteOrder(self):
