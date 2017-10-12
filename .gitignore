@@ -20,3 +20,7 @@ jython.jar
 
 # Cache
 .cache/
+
+# Coverage
+htmlcov/
+.coverage
