@@ -464,13 +464,3 @@ else:
         t -- string two
         """
         return "".join(chr(ord(x) ^ ord(y)) for x, y in zip(s, t))
-
-
-def stringToLong(s):
-    """Convert any string to a number."""
-    return int(binascii.hexlify(s), 16)
-
-
-def longToString(n):
-    """Convert some longs to string."""
-    return binascii.unhexlify("%x" % n)
