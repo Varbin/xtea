@@ -279,7 +279,7 @@ class XTEACipher(object):
                 tx = _encrypt(self.key, self.IV, self.rounds // 2,
                               self.endian)
                 self.IV = xor_strings(block, tx)
-                out.append(fb)
+                out.append(self.IV)
 
             return b"".join(out)
 

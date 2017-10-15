@@ -3,7 +3,7 @@ import os
 
 from time import clock
 
-from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, XTEACipher
+from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, MODE_CFB, XTEACipher
 from xtea.counter import Counter
 
 AMOUNT = 50
@@ -53,7 +53,7 @@ class TestModes(unittest.TestCase):
         start = clock()
 
         for i in range(AMOUNT):
-            _test_mode(MODE_CBC)
+            _test_mode(MODE_CFB)
 
         end = clock()
         time = end - start
