@@ -241,38 +241,29 @@ class XTEACipher(object):
 
         #ECB
         if self.mode == MODE_ECB:
-            if not len(data) % (self.block_size):
-                out = []
-                blocks = self._block(data)
+            out = []
+            blocks = self._block(data)
 
-                for block in blocks:
-                    out.append(
-                        _encrypt(self.key, block, self.rounds // 2,
-                                 self.endian))
+            for block in blocks:
+                out.append(
+                    _encrypt(self.key, block, self.rounds // 2,
+                             self.endian))
 
-                return b"".join(out)
-            else:
-                raise ValueError(
-                    "Input string must be a multiple of blocksize in length")
+            return b"".join(out)
 
         #CBC
         elif self.mode == MODE_CBC:
-            if not len(data) % (self.block_size):
-                out = [self.IV]
-                blocks = self._block(data)
+            out = [self.IV]
+            blocks = self._block(data)
 
-                for i in range(0, len(blocks)):
-                    xored = xor_strings(blocks[i], out[i])
-                    out.append(
-                        _encrypt(self.key, xored, self.rounds // 2,
-                                 self.endian))
+            for i in range(0, len(blocks)):
+                xored = xor_strings(blocks[i], out[i])
+                out.append(
+                    _encrypt(self.key, xored, self.rounds // 2,
+                             self.endian))
 
-                self.IV = out[-1]
-                return b"".join(out[1:])
-
-            else:
-                raise ValueError(
-                    "Input string must be a multiple of blocksize in length")
+            self.IV = out[-1]
+            return b"".join(out[1:])
 
         #OFB
         elif self.mode == MODE_OFB:
@@ -281,21 +272,16 @@ class XTEACipher(object):
 
         #CFB
         elif self.mode == MODE_CFB:
-            if not len(data) % self.block_size:
-                blocks = self._block(data)
-                out = []
+            blocks = self._block(data)
+            out = []
 
-                for block in blocks:
-                    tx = _encrypt(self.key, self.IV, self.rounds // 2,
-                                  self.endian)
-                    self.IV = xor_strings(block, tx)
-                    out.append(fb)
+            for block in blocks:
+                tx = _encrypt(self.key, self.IV, self.rounds // 2,
+                              self.endian)
+                self.IV = xor_strings(block, tx)
+                out.append(fb)
 
-                return b"".join(out)
-
-            else:
-                raise ValueError(
-                    "Input string must be a multiple of blocksize in length")
+            return b"".join(out)
 
         #CTR
         elif self.mode == MODE_CTR:
@@ -315,34 +301,29 @@ class XTEACipher(object):
             ValueError
         """
         #ECB
-        if self.mode == MODE_ECB:
-            if not (len(data) % self.block_size):
-                out = []
-                blocks = self._block(data)
-                for block in blocks:
-                    out.append(
-                        _decrypt(self.key, block, self.rounds // 2,
-                                 self.endian))
-                return b"".join(out)
-            else:
-                raise ValueError(
-                    "Input string must be a multiple of blocksize in length")
+        if self.mode == MODE_ECB::
+            out = []
+            blocks = self._block(data)
+            for block in blocks:
+                out.append(
+                    _decrypt(self.key, block, self.rounds // 2,
+                             self.endian))
+            return b"".join(out)
 
         #CBC
         elif self.mode == MODE_CBC:
-            if not (len(data) % self.block_size):
-                out = []
-                blocks = self._block(data)
-                blocks = [self.IV] + blocks
-                for i in range(1, len(blocks)):
-                    out.append(
-                        xor_strings(
-                            _decrypt(self.key, blocks[i], self.rounds // 2,
-                                     self.endian), blocks[i - 1]))
+            out = []
+            blocks = self._block(data)
+            blocks = [self.IV] + blocks
+            for i in range(1, len(blocks)):
+                out.append(
+                    xor_strings(
+                        _decrypt(self.key, blocks[i], self.rounds // 2,
+                                 self.endian), blocks[i - 1]))
 
-                self.IV = blocks[-1]
+            self.IV = blocks[-1]
 
-                return b"".join(out)
+            return b"".join(out)
 
         #OFB
         elif self.mode == MODE_OFB:
@@ -351,20 +332,16 @@ class XTEACipher(object):
 
         #CFB
         elif self.mode == MODE_CFB:
-            if not len(data) % self.block_size:
-                blocks = self._block(data)
-                out = []
+            blocks = self._block(data)
+            out = []
 
-                for block in blocks:
-                    tx = _encrypt(self.key, self.IV, self.rounds // 2,
-                                  self.endian)
-                    self.IV = block[:]
-                    out.append(xor_strings(block, tx))
-                return b"".join(out)
+            for block in blocks:
+                tx = _encrypt(self.key, self.IV, self.rounds // 2,
+                              self.endian)
+                self.IV = block[:]
+                out.append(xor_strings(block, tx))
+            return b"".join(out)
 
-            else:
-                raise ValueError(
-                    "Input string must be a multiple of blocksize in length")
 
         #CTR
         elif self.mode == MODE_CTR:
@@ -377,10 +354,11 @@ class XTEACipher(object):
     def _block(self, s):
         l = []
         rest_size = len(s) % self.block_size
+        if rest_size:
+            raise ValueError("Input string must be a multiple of blocksize "
+                             "in length")
         for i in range(len(s) // self.block_size):
             l.append(s[i * self.block_size:((i + 1) * self.block_size)])
-        if rest_size:
-            raise ValueError()
         return l
 
 
