@@ -31,6 +31,8 @@ import binascii
 import sys
 import warnings
 
+from .counter import Counter
+
 MODE_ECB = 1
 MODE_CBC = 2
 MODE_CFB = 3
@@ -186,7 +188,7 @@ class XTEACipher(object):
                 raise ValueError("IV must be 8 bytes long")
         elif self.mode == MODE_CBC or self.mode == MODE_CFB:  # cfb & cbc need iv
             raise ValueError("CBC, CFB need an IV")
-        elif self.mode == MODE_OFB:  # ofb nocne if not given = "\x00" * 16
+        elif self.mode == MODE_OFB:  # ofb nonce if not given = "\x00" * 16
             self.IV = '\00\00\00\00\00\00\00\00'
 
         if "counter" in keys:  # ctr needs counter
@@ -301,7 +303,7 @@ class XTEACipher(object):
             ValueError
         """
         #ECB
-        if self.mode == MODE_ECB::
+        if self.mode == MODE_ECB:
             out = []
             blocks = self._block(data)
             for block in blocks:
@@ -370,8 +372,6 @@ Functions:
 _encrypt -- Encrypt one single block of data.
 _decrypt -- Decrypt one single block of data.
 xor_strings -- xor to strings together.
-stringToLong -- Convert any string to a number.
-longToString --Convert some longs to string.
 """
 
 

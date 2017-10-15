@@ -8,8 +8,9 @@ dist/
 build/
 egg/
 *.egg-info/
-# Sometimes they are there...
+# Sometimes those are there...
 *.egg
+*.eggs
 
 .project
 .pydevproject
