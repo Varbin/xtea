@@ -356,7 +356,7 @@ class XTEACipher(object):
                 out = []
 
                 for block in blocks:
-                    tx = _encrypt(self.key, self.IV, self.rounds // 2,
+                    tx = _decrypt(self.key, self.IV, self.rounds // 2,
                                   self.endian)
                     self.IV = block[:]
                     out.append(xor_strings(block, tx))
