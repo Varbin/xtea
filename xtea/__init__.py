@@ -82,10 +82,9 @@ def new(key, **kwargs):
         
         counter (callable object): a callable counter wich returns bytestrings
 
-
             .. versionchanged:: 0.5.0
-               Only bytestrings can be used, previously integers were allowed,
-               too.
+               Only callable objects returning bytestrings can be used,
+               previously integers instead of callables were allowed, too.
         
         endian (char / string):
             how data is beeing extracted (default "!" = big endian)
