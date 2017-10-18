@@ -13,4 +13,6 @@ install:
   - pip install -r requirements.txt
 script:
   - python setup.py build install
-  - python setup.py test
+  - python -m coverage run --source=xtea setup.py test
+after_success:
+  - python -m coverage report
