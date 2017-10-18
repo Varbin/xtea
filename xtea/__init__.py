@@ -172,38 +172,32 @@ class XTEACipher(object):
 
         keys = kwargs.keys()  # arguments
 
-        if "mode" in keys:  # check for mode
-            self.mode = kwargs["mode"]  # read mode
-        else:
+        self.mode = kwargs.get("mode")
+
+        if self.mode == None:
             self.mode = MODE_ECB  # if not given
             warnings.warn("Using implicit ECB!")
 
-        if self.mode == MODE_PGP:
-            raise NotImplementedError("PGP-CFB is not implemented")
+        if self.mode not in (
+                MODE_ECB, MODE_CBC, MODE_CFB, MODE_OFB, MODE_CTR):
+            raise NotImplementedError(
+                "The selected mode of operation does not exist.")
 
-        if "IV" in keys:  # get iv
-            self.IV = kwargs["IV"]
-            if len(self.IV) != self.block_size:  # iv len = blocksize
-                raise ValueError("IV must be 8 bytes long")
-        elif self.mode == MODE_CBC or self.mode == MODE_CFB:  # cfb & cbc need iv
-            raise ValueError("CBC, CFB need an IV")
-        elif self.mode == MODE_OFB:  # ofb nonce if not given = "\x00" * 16
-            self.IV = '\00\00\00\00\00\00\00\00'
+        self.IV = kwargs.get("IV")
 
-        if "counter" in keys:  # ctr needs counter
-            self.counter = kwargs["counter"]
-        elif self.mode == MODE_CTR:  # if ctr and counter not given
-            raise ValueError("CTR needs a counter")
+        # cbc, cfb and ofb need an iv
+        if self.mode in (MODE_CBC, MODE_CFB, MODE_OFB) and (
+                self.IV is None or len(self.IV) != self.block_size):
+            raise ValueError(
+                "CBC, CFB and OFB need an IV with a length of 8 bytes!")
 
-        if "rounds" in keys:  # rounds to operate
-            self.rounds = kwargs["rounds"]
-        else:
-            self.rounds = 64
+        self.counter = kwargs.get("counter")
 
-        if "endian" in keys:  # endian for struct str -> int -> str (byte order)
-            self.endian = kwargs["endian"]
-        else:
-            self.endian = "!"  # default network/big endian
+        if self.mode == MODE_CTR and not callable(self.counter): 
+            raise ValueError("CTR mode needs a callable counter")
+
+        self.rounds = int(kwargs.get("rounds", 64))
+        self.endian = kwargs.get("endian", "!")
 
         if self.mode == MODE_OFB:
 
