@@ -241,53 +241,30 @@ class XTEACipher(object):
             ValueError
         """
 
-        #ECB
-        if self.mode == MODE_ECB:
-            out = []
-            blocks = self._block(data)
-
-            for block in blocks:
-                out.append(
-                    _encrypt(self.key, block, self.rounds // 2,
-                             self.endian))
-
-            return b"".join(out)
-
-        #CBC
-        elif self.mode == MODE_CBC:
-            out = [self.IV]
-            blocks = self._block(data)
-
-            for i in range(0, len(blocks)):
-                xored = xor_strings(blocks[i], out[i])
-                out.append(
-                    _encrypt(self.key, xored, self.rounds // 2,
-                             self.endian))
-
-            self.IV = out[-1]
-            return b"".join(out[1:])
-
-        #OFB
-        elif self.mode == MODE_OFB:
-            #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
+        if self.mode in (MODE_OFB, MODE_CTR):
             return self._stream(data)
 
-        #CFB
-        elif self.mode == MODE_CFB:
-            blocks = self._block(data)
-            out = []
+        args = (self.rounds // 2, self.endian)
 
-            for block in blocks:
-                tx = _encrypt(self.key, self.IV, self.rounds // 2,
-                              self.endian)
-                self.IV = xor_strings(block, tx)
-                out.append(self.IV)
+        out = []
+        blocks = self._block(data)
 
-            return b"".join(out)
+        for block in blocks:
+            if self.mode == MODE_ECB:
+                ecd = _encrypt(self.key, block, *args)
+            elif self.mode == MODE_CBC:
+                xored = xor_strings(self.IV, block)
+                ecd = self.IV = _encrypt(self.key, xored, *args)
+            elif self.mode == MODE_CFB:
+                keystream = _encrypt(self.key, self.IV, *args)
+                ecd = self.IV = xor_strings(keystream, block)
+            else:
+                raise ValueError("Unknown mode of operation!")
 
-        #CTR
-        elif self.mode == MODE_CTR:
-            return self._stream(data)
+            out.append(ecd)
+
+        return b"".join(out)
+
 
     def decrypt(self, data):
         """\
@@ -302,52 +279,33 @@ class XTEACipher(object):
         Raises:
             ValueError
         """
-        #ECB
-        if self.mode == MODE_ECB:
-            out = []
-            blocks = self._block(data)
-            for block in blocks:
-                out.append(
-                    _decrypt(self.key, block, self.rounds // 2,
-                             self.endian))
-            return b"".join(out)
 
-        #CBC
-        elif self.mode == MODE_CBC:
-            out = []
-            blocks = self._block(data)
-            blocks = [self.IV] + blocks
-            for i in range(1, len(blocks)):
-                out.append(
-                    xor_strings(
-                        _decrypt(self.key, blocks[i], self.rounds // 2,
-                                 self.endian), blocks[i - 1]))
-
-            self.IV = blocks[-1]
-
-            return b"".join(out)
-
-        #OFB
-        elif self.mode == MODE_OFB:
-            #return _crypt_ofb(self.key, data, self.IV, self.rounds/2)
+        if self.mode in (MODE_OFB, MODE_CTR):
             return self._stream(data)
 
-        #CFB
-        elif self.mode == MODE_CFB:
-            blocks = self._block(data)
-            out = []
+        args = (self.rounds // 2, self.endian)
 
-            for block in blocks:
-                tx = _encrypt(self.key, self.IV, self.rounds // 2,
-                              self.endian)
-                self.IV = block[:]
-                out.append(xor_strings(block, tx))
-            return b"".join(out)
+        out = []
+        blocks = self._block(data)
 
+        for block in blocks:
+            if self.mode == MODE_ECB:
+                dec = _decrypt(self.key, block, *args)
+            elif self.mode == MODE_CBC:
+                decrypted_but_not_xored = _decrypt(self.key, block, *args)
+                dec = xor_strings(self.IV, decrypted_but_not_xored)
+                self.IV = block
+            elif self.mode == MODE_CFB:
+                keystream = _encrypt(self.key, self.IV, *args)
+                dec = xor_strings(keystream, block)
+                self.IV = block
+            else:
+                raise ValueError("Unknown mode of operation!")
 
-        #CTR
-        elif self.mode == MODE_CTR:
-            return self._stream(data)
+            out.append(dec)
+
+        return b"".join(out)
+
 
     def _stream(self, data):
         xor = [b_chr(x ^ y) for (x, y) in zip(map(b_ord, data), self._keygen)]
