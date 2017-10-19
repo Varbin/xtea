@@ -1,18 +1,27 @@
+env:
+  global:
+    secure: eaS/vnTcgpS/tt6PycER0RgXndOxLGwa4axDozXYaY/7UBlVkLeOAwi/20JrVQs4WWVMKBaziuMaW0oycu976Xlvd12yDHDH6AQuIXm00oJcJnNacnYrnWzKyg5ZDxOiDlVXax7xnLlj3Co2GmutVnEWNNYKzGCZE/dde/Fe6DE=
 language: python
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "3.5"
-  - "3.6"
-  - "3.7-dev"
+  - '2.7'
+  - '3.3'
+  - '3.4'
+  - '3.5'
+  - '3.5'
+  - '3.6'
+  - 3.7-dev
   - pypy
   - pypy3
 install:
   - pip install -r requirements.txt
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter before-build; fi
 script:
   - python setup.py build install
   - python -m coverage run --source=xtea setup.py test
+after_script:
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
 after_success:
   - python -m coverage report
