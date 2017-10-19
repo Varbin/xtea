@@ -21,7 +21,7 @@ before_script:
 script:
   - python setup.py build install
   - python -m coverage run --source=xtea setup.py test
+after_script:
   - python -m coverage xml
   - python -m coverage report
-after_script:
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
