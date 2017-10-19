@@ -10,6 +10,10 @@ Python XTEA
    :target: https://codeclimate.com/github/Varbin/xtea/test_coverage
    :alt: Test Coverage
 
+.. image:: https://travis-ci.org/Varbin/xtea.svg?branch=master
+   :target: https://travis-ci.org/Varbin/xtea
+   :alt: Travis CI build status
+
 This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).
 
     XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
