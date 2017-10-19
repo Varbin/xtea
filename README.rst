@@ -2,14 +2,20 @@
 Python XTEA
 ===========
 
-    This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).
+.. image:: https://api.codeclimate.com/v1/badges/563d6ad2607d6ed6fda3/maintainability
+   :target: https://codeclimate.com/github/Varbin/xtea/maintainability
+   :alt: Maintainability
+
+.. image:: https://api.codeclimate.com/v1/badges/563d6ad2607d6ed6fda3/test_coverage
+   :target: https://codeclimate.com/github/Varbin/xtea/test_coverage
+   :alt: Test Coverage
+
+This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).
 
     XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
     The algorithm is secure at 2014 with the recommend 64 rounds (32 cycles). This
     implementation supports following modes of operation:
     ECB, CBC, CFB, OFB, CTR
-	
-    It also supports CBC-MAC.
 
 
 Example:
