@@ -1,6 +1,3 @@
-env:
-  global:
-    secure: "Jw1Sl9H3p/sDXWa+qcaMXJ2oFqkDy3rv0229NjW7uetS02gMq37ALrCvWuz7CHuUsXEuMyN/q2vfwqc1DxbpzbySqPREVdkxc494yn8Fl4o97KGsKBGJKHb8by7K4PFF+1QGjh7jn5ADP174v9n5LkM+oL2deedLQocMdjmD/kM="
 language: python
 python:
   - '2.7'
@@ -14,14 +11,10 @@ python:
   - pypy3
 install:
   - pip install -r requirements.txt
-before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter before-build; fi
 script:
   - python setup.py build install
   - python -m coverage run --source=xtea setup.py test
+  - python -m coverage report --fail-under 80
 after_script:
   - python -m coverage xml
-  - python -m coverage report
-  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
+  - bash <(curl -s https://codecov.io/bash)
