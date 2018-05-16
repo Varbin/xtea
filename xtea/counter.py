@@ -1,6 +1,5 @@
-################ Basic counter for CTR mode
-import sys
 import struct
+import sys
 
 PY_3 = sys.version_info.major >= 3
 
@@ -57,28 +56,28 @@ class Counter:
 
     def __init__(self, nonce, byteorder='big'):
         """Constructor for a counter which is suitable for CTR mode.
-        Args:
-            nonce (bytes): The start value, \
-            it MUST be random if it should be secure, for example, use *os.urandom* for it.
-        """
 
+        nonce (bytes): The start value;
+                it MUST be unique to be secure.
+                The secrets module or os.urandom(n) are solid
+                choices for generating random bytes.
+        """
         self.__nonce = nonce
         self.byteorder = byteorder
-        self.reset()
+        self.__current = from_bytes(self.__nonce, self.byteorder)
 
     def __call__(self):
-        """The method that makes it callable.
+        """Increase the counter by one.
+
         Returns:
             bytes
         """
-
         value = to_bytes(self.__current, 8, self.byteorder)
         self.__current += 1
         self.__current %= 2**64
         return value
 
     def reset(self):
-        """Reset the counter to the nonce
-        """
+        """Reset the counter to the nonce."""
 
         self.__current = from_bytes(self.__nonce, self.byteorder)

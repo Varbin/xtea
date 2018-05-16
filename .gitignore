@@ -25,3 +25,6 @@ jython.jar
 # Coverage
 htmlcov/
 .coverage
+
+# Pychar
+.idea/

@@ -4,8 +4,7 @@ Changelog
 (dev) Version 0.6.1; ...
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.6.1] Improved tests | PEP8 | bugfixing
-
+ - Improved tests
  - PEP8-style formatting
  - Unittests: Counter, modes (but not results of them!), test vectors
  - [BREAKING CHANGE] Counter class is now in xtea.counter
@@ -13,28 +12,25 @@ Changelog
 (unreleased) Version 0.6.0; Oct 16, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.6.0] Made Python 3 compatible | removed counters can return integers | cipher objects remember state
-
  - Python 3 does work now
  - [BREAKING CHANGE] counters cannot return numbers any more, they must return bytestrings now
- - [BREAKING CHANGE] Cipher objects remember state, so two consecutive calls to XTEA.encrypt should not return the same
+ - [BREAKING CHANGE] Cipher objects remember state, so two consecutive calls to XTEACipher.encrypt should not return the same
  - improved documentation
 
 (unreleased) Version 0.5.0; Oct 15, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.5.0] Removed CBCMAC
+ - Removed CBCMAC
 
 Version 0.4.1; Jul 30, 2015
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.4.1] Fixed installer
+ - Fixed installer
 
 Version 0.4.0; Jul 12, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.4.0] Buggless & PEP compliant CTR | added CBCMAC
-
+ - Buggless & PEP compliant CTR
  - CTR mode works with strings now
  - raises DeprecatedWarning if a number is returned
  - CBCMAC class added (use static method CBCMAC.new(args) to create)
@@ -42,19 +38,16 @@ Version 0.4.0; Jul 12, 2014
 Version 0.3.2; Jul 11, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.3.2] Minor Fixes
+ - Minor Fixes
 
 Version 0.3.1; Jul 11, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.3.1] Minor Fixes
-
+ -  Minor Fixes
  - Fixed that the length of data will not be checked
 
 Version 0.3.0; Jul 11, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-[0.3.0] Added CFB mode
 
  - Added CFB mode
  - Fully working with PEP 272
@@ -73,7 +66,7 @@ Never released...
 Version 0.2.0; Jul 9, 2014
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[0.2.0] Added a test feature; warning in CTR
+ - Added a test feature; warning in CTR
 
  - Added a test feature
  - Raises warning on CTR, added a handler that CTR will not crash anymore ;) 
@@ -92,5 +85,5 @@ Version 0.1; Jun 22, 2014
 [0.1] Initial release
 
  - Supports all mode except CFB
- - Buggy CTR ( "ß" = "\\xc3\\x9f" )
+ - Buggy CTR ( "ÃŸ" = "\\xc3\\x9f" )
  - Working with PEP 272, default mode is ECB
