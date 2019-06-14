@@ -5,6 +5,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+import re
+
 
 def get_file(name):
     try:
@@ -14,19 +16,37 @@ def get_file(name):
         return ''
 
 
+META_FILE = get_file("xtea/__init__.py")
+
+
+def find_meta(meta):
+    """
+    Extract __*meta*__ from META_FILE.
+
+    Source: https://github.com/python-attrs/attrs/blob/master/setup.py#L73
+    """
+    meta_match = re.search(
+        r"^__{meta}__ = ['\"]([^'\"]*)['\"]".format(meta=meta), META_FILE, re.M
+    )
+    if meta_match:
+        return meta_match.group(1)
+
+    raise RuntimeError("Unable to find __{meta}__ string.".format(meta=meta))
+
+
 long_text = get_file("README.rst") + "\n\n" + get_file("changelog.rst")
 
 setup(name='xtea',
-      version='0.6.1',
+      version=find_meta("version"),
       description="A python version of XTEA",
       long_description=long_text,
-      author="Simon Biewald",
-      author_email="simon.biewald@hotmail.de",
+      author=find_meta("author"),
+      author_email=find_meta("email"),
       url="https://github.com/Varbin/xtea/wiki",
       download_url="https://github.com/Varbin/xtea",
       bugtrack_url="https://github.com/Varbin/xtea/issues",
       keywords="xtea tea encryption cryptography",
-      license="Public Domain",
+      license=find_meta("license"),
       packages=["xtea"],
       classifiers=[
         "Development Status :: 4 - Beta",
