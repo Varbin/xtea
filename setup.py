@@ -66,5 +66,5 @@ setup(name='xtea',
         "Topic :: Security :: Cryptography"],
       setup_requires=['pytest-runner'],
       tests_require=['pytest'],
-      install_requires=['pep272-encryption'],
+      install_requires=['pep272-encryption>=0.3'],
       )
