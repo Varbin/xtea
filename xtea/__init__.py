@@ -27,11 +27,10 @@ True
 from __future__ import print_function
 
 import struct
-import binascii
 import sys
 import warnings
 
-from .counter import Counter
+from .counter import Counter  # noqa: F401
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -76,16 +75,16 @@ def new(key, **kwargs):
             3 = CFB
             5 = OFB
             6 = CTR
-        
+
         IV (bytes): Initialisation vector (needed with CBC/CFB).
             Must be 8 in length.
-        
+
         counter (callable object): a callable counter wich returns bytestrings
 
             .. versionchanged:: 0.5.0
                Only callable objects returning bytestrings can be used,
                previously integers instead of callables were allowed, too.
-        
+
         endian (char / string):
             how data is beeing extracted (default "!" = big endian)
             ..seealso:: modules :py:mod:`struct`
@@ -105,7 +104,7 @@ def new(key, **kwargs):
     return XTEACipher(key, **kwargs)
 
 
-################ XTEACipher class
+# XTEACipher class
 
 
 class XTEACipher(object):
@@ -123,7 +122,7 @@ class XTEACipher(object):
     Variables:
     IV -- the initialisation vector (default None or "\00"*8)
     counter -- counter for CTR (default None)
-    
+
     """
 
     block_size = 8
@@ -152,7 +151,7 @@ class XTEACipher(object):
 
             counter (callable object): a callable counter wich returns bytes
                 or int (needed with CTR)
-      
+
             endian (char / string):
                 how data is beeing extracted (default "!")
                 ..seealso:: modules :py:mod:`struct`
@@ -170,11 +169,9 @@ class XTEACipher(object):
         if len(key) != key_size / 8:  # Check key len
             raise ValueError("Key must be 128 bit long")
 
-        keys = kwargs.keys()  # arguments
-
         self.mode = kwargs.get("mode")
 
-        if self.mode == None:
+        if self.mode is None:
             self.mode = MODE_ECB  # if not given
             warnings.warn("Using implicit ECB!")
 
@@ -193,7 +190,7 @@ class XTEACipher(object):
 
         self.counter = kwargs.get("counter")
 
-        if self.mode == MODE_CTR and not callable(self.counter): 
+        if self.mode == MODE_CTR and not callable(self.counter):
             raise ValueError("CTR mode needs a callable counter")
 
         self.rounds = int(kwargs.get("rounds", 64))
@@ -258,7 +255,6 @@ class XTEACipher(object):
 
         return b"".join(out)
 
-
     def decrypt(self, data):
         """\
         Decrypt data, it must be a multiple of 8 in length except for
@@ -299,23 +295,22 @@ class XTEACipher(object):
 
         return b"".join(out)
 
-
     def _stream(self, data):
         xor = [b_chr(x ^ y) for (x, y) in zip(map(b_ord, data), self._keygen)]
         return b"".join(xor)
 
     def _block(self, s):
-        l = []
+        blocks = []
         rest_size = len(s) % self.block_size
         if rest_size:
             raise ValueError("Input string must be a multiple of blocksize "
                              "in length")
         for i in range(len(s) // self.block_size):
-            l.append(s[i * self.block_size:((i + 1) * self.block_size)])
-        return l
+            blocks.append(s[i * self.block_size:((i + 1) * self.block_size)])
+        return blocks
 
 
-################ Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
+# Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
 """
 This are utilities only, use them only if you know what you do.
 

@@ -39,7 +39,7 @@ else:
 class Counter:
     """Small counter for CTR mode, based on arrays
     Example:
-    
+
         >>> from xtea.counter import Counter
         >>> nonce = b"$2dUI84e" # This should be random
         >>> c = Counter(nonce)

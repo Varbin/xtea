@@ -2,7 +2,7 @@
 """
 Testvectors for XTEA found at:
  - http://www.tayloredge.com/reference/Mathematics/XTEA.pdf
- 
+
 """
 
 import xtea
