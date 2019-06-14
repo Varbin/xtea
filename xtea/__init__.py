@@ -27,14 +27,19 @@ True
 
 from __future__ import print_function
 
+__all__ = ("new", "XTEACipher")
+
+__version__ = "0.6.1"
+__author__ = "Simon Biewald"
+__email__ = "simon@fam-biewald.de"
+__license__ = "Public Domain"
+
 import struct
 import sys
 import warnings
 
 from pep272_encryption import PEP272Cipher
 from .counter import Counter  # noqa: F401
-
-__all__ = ("new", "XTEACipher")
 
 MODE_ECB = 1
 MODE_CBC = 2
