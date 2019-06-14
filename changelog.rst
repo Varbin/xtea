@@ -8,6 +8,7 @@ Changelog
  - PEP8-style formatting
  - Unittests: Counter, modes (but not results of them!), test vectors
  - [BREAKING CHANGE] Counter class is now in xtea.counter
+ - Python 3.3 is not tested anymore on Travis CI
 
 (unreleased) Version 0.6.0; Oct 16, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

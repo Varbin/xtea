@@ -1,12 +1,17 @@
 import unittest
 import os
 
-from time import clock
+import time
 
 from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, MODE_CFB, XTEACipher
 from xtea.counter import Counter
 
 AMOUNT = 50
+
+if hasattr(time, "perf_counter"):
+    clock = time.perf_counter
+else:
+    clock = time.clock
 
 
 def _test_mode(mode):
