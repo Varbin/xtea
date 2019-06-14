@@ -20,10 +20,10 @@ def _test_mode(mode):
     key = os.urandom(16)
     iv = os.urandom(8)
 
-    e = XTEACipher(key, IV=iv, counter=counter, mode=mode)
+    e = XTEACipher(key, IV=iv, counter=counter, mode=mode, segment_size=64)
     encrypted = e.encrypt(plain)
 
-    d = XTEACipher(key, IV=iv, counter=counter, mode=mode)
+    d = XTEACipher(key, IV=iv, counter=counter, mode=mode, segment_size=64)
 
     counter.reset()
     decrypted = d.decrypt(encrypted)

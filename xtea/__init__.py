@@ -9,11 +9,12 @@ ECB, CBC, CFB, OFB, CTR
 Example:
 
 >>> from xtea import *
->>> key = " "*16  # Never use this
->>> text = "This is a text. "*8
->>> x = new(key, mode=MODE_OFB, IV="12345678")
+>>> from binascii import hexlify
+>>> key = b" "*16  # Never use this
+>>> text = b"This is a text. "*8
+>>> x = new(key, mode=MODE_OFB, IV=b"12345678")
 >>> c = x.encrypt(text)
->>> c.encode("hex")
+>>> hexlify(c).decode()
 'fa66ec11b82e38bc77c14be093bb8aa0d7fe0fb9e6ec015
 7a22d254fee43aea9a64c8dbb2c2b899f66800f264419c8e
 8796ad8f94c7758b916428019d10573943324a9dcf60f883
@@ -30,7 +31,10 @@ import struct
 import sys
 import warnings
 
+from pep272_encryption import PEP272Cipher
 from .counter import Counter  # noqa: F401
+
+__all__ = ("new", "XTEACipher")
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -62,52 +66,13 @@ key_size = 128
 
 
 def new(key, **kwargs):
-    """Create an "XTEACipher" object.
-    It fully PEP-272 comliant, default mode is ECB.
-    Args:
-        key (bytes): The key for encrytion/decryption. Must be 16 in length
-
-    Kwargs:
-
-        mode (int): Mode of operation, must be one of this::
-            1 = ECB
-            2 = CBC
-            3 = CFB
-            5 = OFB
-            6 = CTR
-
-        IV (bytes): Initialisation vector (needed with CBC/CFB).
-            Must be 8 in length.
-
-        counter (callable object): a callable counter wich returns bytestrings
-
-            .. versionchanged:: 0.5.0
-               Only callable objects returning bytestrings can be used,
-               previously integers instead of callables were allowed, too.
-
-        endian (char / string):
-            how data is beeing extracted (default "!" = big endian)
-            ..seealso:: modules :py:mod:`struct`
-
-        rounds (int / float): How many rounds are going to be used,
-            one round are two cycles, there are no *half* cycles.
-            The minimum secure rounds are 37 (default 64)
-
-    Raises:
-        ValueError if invalid/not all data is given.
-        NotImplementedError on MODE_PGP
-
-    Returns:
-       XTEACipher object
-
-    """
     return XTEACipher(key, **kwargs)
 
 
 # XTEACipher class
 
 
-class XTEACipher(object):
+class XTEACipher(PEP272Cipher):
     """The cipher class
 
     Functions:
@@ -129,16 +94,18 @@ class XTEACipher(object):
     IV = None
     counter = None
 
-    def __init__(self, key, **kwargs):
-        """\
-        Alternative constructor.
-        Create an cipher object.
+    def __init__(self, key, mode=None, **kwargs):
+        r"""
+        Create an "XTEACipher" object.
 
-        Args:
-            key (bytes): The key for encrytion/decryption. Must be 16 in length
+        It's fully PEP-272 compliant, default mode is ECB.
 
-        Kwargs:
-            mode (int): Mode of operation, must be one of this::
+        :param key:
+            The key for encryption/decryption. Must be 16 in length.
+        :type key: `bytes`
+
+        :param mode:
+            Mode of operation, must be one of this::
 
                 1 = ECB
                 2 = CBC
@@ -146,169 +113,65 @@ class XTEACipher(object):
                 5 = OFB
                 6 = CTR
 
-            IV (bytes): Initialisation vector (needed with CBC/CFB).
-                Must be 8 in length.
+        :type mode: `int`
 
-            counter (callable object): a callable counter wich returns bytes
-                or int (needed with CTR)
+        :param \**kwargs:
+            See below
 
-            endian (char / string):
-                how data is beeing extracted (default "!")
-                ..seealso:: modules :py:mod:`struct`
+        :Keyword arguments:
+            * *IV* or *iv* (`bytes`):
+                Initialization vector with 8 bytes in length.
+                For **security reasons** it should be *unpredictable*
+                and *must never be used twice for the same key*!.
 
-        Raises:
-            ValueError if invalid/not all required data is give.
-            NotImplementedError on MODE_PGP.
+                **Required for**: *CBC*, *CFB* and *OFB* mode of operation.
 
-        Creates:
-            XTEACipher object
 
+            * *counter* (``callable``):
+                Callable counter which returns 8 bytes each call.
+                For **security reasons** the counter must not have the same
+                output twice.
+
+                **Required for**: *CTR* mode of operation.
+
+                .. versionchanged:: 0.5.0
+                    Integers instead of callable objects are not accepted
+                    anymore.
+
+            * *segment_size* (`int`):
+                The segment size for one encryption "segment" in
+                *CFB* mode in *bits*. It must be a multiple of 8
+                and between 8 and 64.
+
+                **Required for**: *CFB* mode.
+
+            * *endian* (``str``): Endianess of internal conversions.
+                Defaults to "!" meaning big endian.
+
+                 ..seealso:: modules :py:mod:`struct`
+
+            * *rounds* (`int` or `float`):
+                Rounds of the xtea cipher, defaults to 64.
         """
 
-        self.key = key
-        if len(key) != key_size / 8:  # Check key len
-            raise ValueError("Key must be 128 bit long")
+        if mode is None:
+            mode = MODE_ECB
+            warnings.warn("Implicitly selecting ECB mode of operation. "
+                          "The ECB mode is usually insecure to use.")
 
-        self.mode = kwargs.get("mode")
-
-        if self.mode is None:
-            self.mode = MODE_ECB  # if not given
-            warnings.warn("Using implicit ECB!")
-
-        if self.mode not in (
-                MODE_ECB, MODE_CBC, MODE_CFB, MODE_OFB, MODE_CTR):
-            raise NotImplementedError(
-                "The selected mode of operation does not exist.")
-
-        self.IV = kwargs.get("IV")
-
-        # cbc, cfb and ofb need an iv
-        if self.mode in (MODE_CBC, MODE_CFB, MODE_OFB) and (
-                self.IV is None or len(self.IV) != self.block_size):
-            raise ValueError(
-                "CBC, CFB and OFB need an IV with a length of 8 bytes!")
-
-        self.counter = kwargs.get("counter")
-
-        if self.mode == MODE_CTR and not callable(self.counter):
-            raise ValueError("CTR mode needs a callable counter")
+        super(XTEACipher, self).__init__(key, mode, **kwargs)
 
         self.rounds = int(kwargs.get("rounds", 64))
         self.endian = kwargs.get("endian", "!")
 
-        if self.mode == MODE_OFB:
+    def encrypt_block(self, key, block, **kwargs):
+        return _encrypt(key, block, self.rounds // 2, self.endian)
 
-            def keygen():
-                while True:
-                    self.IV = _encrypt(self.key, self.IV, self.rounds // 2)
-                    for k in self.IV:
-                        yield b_ord(k)
+    def decrypt_block(self, key, block, **kwargs):
+        return _decrypt(key, block, self.rounds//2, self.endian)
 
-            self._keygen = keygen()
 
-        elif self.mode == MODE_CTR:
-
-            def keygen():
-                while True:
-                    self.IV = _encrypt(self.key,
-                                       self.counter(), self.rounds // 2)
-                    for k in self.IV:
-                        yield b_ord(k)
-
-            self._keygen = keygen()
-
-    def encrypt(self, data):
-        """\
-        Encrypt data, it must be a multiple of 8 in length except for
-        CTR and OFB mode of operation. When using the OFB or CTR mode, the
-        function for encryption and decryption is the same.
-
-        Args:
-            data (bytes): The data to encrypt.
-        Returns:
-            bytestrings
-        Raises:
-            ValueError
-        """
-
-        if self.mode in (MODE_OFB, MODE_CTR):
-            return self._stream(data)
-
-        args = (self.rounds // 2, self.endian)
-
-        out = []
-        blocks = self._block(data)
-
-        for block in blocks:
-            if self.mode == MODE_ECB:
-                ecd = _encrypt(self.key, block, *args)
-            elif self.mode == MODE_CBC:
-                xored = xor_strings(self.IV, block)
-                ecd = self.IV = _encrypt(self.key, xored, *args)
-            elif self.mode == MODE_CFB:
-                keystream = _encrypt(self.key, self.IV, *args)
-                ecd = self.IV = xor_strings(keystream, block)
-            else:
-                raise ValueError("Unknown mode of operation!")
-
-            out.append(ecd)
-
-        return b"".join(out)
-
-    def decrypt(self, data):
-        """\
-        Decrypt data, it must be a multiple of 8 in length except for
-        CTR and OFB mode of operation. When using the OFB or CTR mode, the
-        function for encryption and decryption is the same.
-
-        Args:
-            data (bytes): The data to decrypt.
-        Returns:
-            bytestrings
-        Raises:
-            ValueError
-        """
-
-        if self.mode in (MODE_OFB, MODE_CTR):
-            return self._stream(data)
-
-        args = (self.rounds // 2, self.endian)
-
-        out = []
-        blocks = self._block(data)
-
-        for block in blocks:
-            if self.mode == MODE_ECB:
-                dec = _decrypt(self.key, block, *args)
-            elif self.mode == MODE_CBC:
-                decrypted_but_not_xored = _decrypt(self.key, block, *args)
-                dec = xor_strings(self.IV, decrypted_but_not_xored)
-                self.IV = block
-            elif self.mode == MODE_CFB:
-                keystream = _encrypt(self.key, self.IV, *args)
-                dec = xor_strings(keystream, block)
-                self.IV = block
-            else:
-                raise ValueError("Unknown mode of operation!")
-
-            out.append(dec)
-
-        return b"".join(out)
-
-    def _stream(self, data):
-        xor = [b_chr(x ^ y) for (x, y) in zip(map(b_ord, data), self._keygen)]
-        return b"".join(xor)
-
-    def _block(self, s):
-        blocks = []
-        rest_size = len(s) % self.block_size
-        if rest_size:
-            raise ValueError("Input string must be a multiple of blocksize "
-                             "in length")
-        for i in range(len(s) // self.block_size):
-            blocks.append(s[i * self.block_size:((i + 1) * self.block_size)])
-        return blocks
-
+new.__doc__ = XTEACipher.__init__.__doc__
 
 # Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
 """

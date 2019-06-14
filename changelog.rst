@@ -9,6 +9,9 @@ Changelog
  - Unittests: Counter, modes (but not results of them!), test vectors
  - [BREAKING CHANGE] Counter class is now in xtea.counter
  - Python 3.3 is not tested anymore on Travis CI
+ - [BREAKING CHANGE] CFB mode is now correctly implemented.
+   By setting ``partition_size`` it is possible to set the
+   internal partition size (in bits) as per PEP-272.
 
 (unreleased) Version 0.6.0; Oct 16, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
