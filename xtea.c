@@ -21,8 +21,8 @@ static PyObject * xtea_encrypt_int(PyObject *self, PyObject *args, PyObject *kwa
         sum += DELTA;
         v1 += (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + k[(sum>>11) & 3]);
     }
-    PyObject *v0r = PyLong_FromLong(v0);
-    PyObject *v1r = PyLong_FromLong(v1);
+    PyObject *v0r = PyLong_FromUnsignedLongLong(v0);
+    PyObject *v1r = PyLong_FromUnsignedLongLong(v1);
 
     return PyTuple_Pack(2, v0r, v1r);
 };
