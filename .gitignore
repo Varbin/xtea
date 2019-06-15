@@ -28,3 +28,6 @@ htmlcov/
 
 # Pychar
 .idea/
+
+*.pyd
+*.so

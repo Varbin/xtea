@@ -29,7 +29,7 @@ from __future__ import print_function
 
 __all__ = ("new", "XTEACipher")
 
-__version__ = "0.6.1"
+__version__ = "0.7.0.dev0"
 __author__ = "Simon Biewald"
 __email__ = "simon@fam-biewald.de"
 __license__ = "Public Domain"
@@ -40,6 +40,38 @@ import warnings
 
 from pep272_encryption import PEP272Cipher
 from .counter import Counter  # noqa: F401
+
+try:
+    from _xtea import \
+        encrypt_int as _encrypt_int, \
+        decrypt_int as _decrypt_int
+
+except ImportError:
+    def _encrypt_int(k, v, n=32):
+        v0, v1 = v
+
+        sum, delta, mask = 0, 0x9e3779b9, 0xffffffff
+        for round in range(n):
+            v0 = (v0 + (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
+            sum = (sum + delta) & mask
+            v1 = (v1 +
+                  (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
+
+        return v0, v1
+
+    def _decrypt_int(k, v, n=32):
+        v0, v1 = v
+
+        delta, mask = 0x9e3779b9, 0xffffffff
+        sum = (delta * n) & mask
+        for round in range(n):
+            v1 = (v1 -
+                  (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
+            sum = (sum - delta) & mask
+            v0 = (v0 - (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
+
+        return v0, v1
+
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -167,18 +199,39 @@ class XTEACipher(PEP272Cipher):
         super(XTEACipher, self).__init__(key, mode, **kwargs)
 
         self.rounds = int(kwargs.get("rounds", 64))
+        self.cycles = self.rounds // 2
         self.endian = kwargs.get("endian", "!")
 
+        self.__k = struct.unpack(self.endian + "4L", self.key)
+
     def encrypt_block(self, key, block, **kwargs):
-        return _encrypt(key, block, self.rounds // 2, self.endian)
+        encrypted_block = _encrypt_int(
+            self.__k,
+            struct.unpack(self.endian + "2L", block),
+            self.cycles
+        )
+
+        return struct.pack(
+            self.endian + "2L",
+            *encrypted_block
+        )
 
     def decrypt_block(self, key, block, **kwargs):
-        return _decrypt(key, block, self.rounds//2, self.endian)
+        decrypted_block = _decrypt_int(
+            self.__k,
+            struct.unpack(self.endian + "2L", block),
+            self.cycles
+        )
+
+        return struct.pack(
+            self.endian + "2L",
+            *decrypted_block
+        )
 
 
 new.__doc__ = XTEACipher.__init__.__doc__
 
-# Util functions: basic encrypt/decrypt, OFB, xor, stringToLong
+# Util functions: basic encrypt/decrypt, xor
 """
 This are utilities only, use them only if you know what you do.
 
@@ -201,15 +254,12 @@ def _encrypt(key, block, n=32, endian="!"):
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
-    v0, v1 = struct.unpack(endian + "2L", block)
+    v = struct.unpack(endian + "2L", block)
     k = struct.unpack(endian + "4L", key)
-    sum, delta, mask = 0, 0x9e3779b9, 0xffffffff
-    for round in range(n):
-        v0 = (v0 + (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
-        sum = (sum + delta) & mask
-        v1 = (v1 +
-              (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
-    return struct.pack(endian + "2L", v0, v1)
+
+    v_encrypted = _encrypt_int(k, v, n)
+
+    return struct.pack(endian + "2L", *v_encrypted)
 
 
 def _decrypt(key, block, n=32, endian="!"):
@@ -224,16 +274,12 @@ def _decrypt(key, block, n=32, endian="!"):
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
-    v0, v1 = struct.unpack(endian + "2L", block)
+    v = struct.unpack(endian + "2L", block)
     k = struct.unpack(endian + "4L", key)
-    delta, mask = 0x9e3779b9, 0xffffffff
-    sum = (delta * n) & mask
-    for round in range(n):
-        v1 = (v1 -
-              (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
-        sum = (sum - delta) & mask
-        v0 = (v0 - (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
-    return struct.pack(endian + "2L", v0, v1)
+
+    v_decrypted = _decrypt_int(k, v, n)
+
+    return struct.pack(endian + "2L", *v_decrypted)
 
 
 if PY_3:
