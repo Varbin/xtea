@@ -27,7 +27,10 @@ True
 
 from __future__ import print_function
 
-__all__ = ("new", "XTEACipher")
+__all__ = ("new", "XTEACipher",
+           "MODE_ECB", "MODE_CBC", "MODE_CFB",
+           "MODE_CTR", "MODE_OFB", "MODE_PGP",
+           "key_size", "block_size")
 
 __version__ = "0.7.0.dev0"
 __author__ = "Simon Biewald"
