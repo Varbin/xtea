@@ -14,6 +14,15 @@ Python XTEA
    :target: https://travis-ci.org/Varbin/xtea
    :alt: Travis CI build status
 
+.. image:: https://ci.appveyor.com/api/projects/status/mgfc1g53vvc9umkl?svg=true
+   :target: https://ci.appveyor.com/project/Varbin/xtea/
+   :alt: Appveyor CI build status
+
+.. image:: https://readthedocs.org/projects/xtea/badge/?version=latest
+   :target: https://xtea.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+
 This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algorithm).
 
     XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
@@ -32,9 +41,11 @@ Example:
     >>> text == x.decrypt(c)
     True
     
-Note
-====
-   
-    I do NOT guarantee that this implementation (or the base cipher) is secure. If you find bugs, please report them at
-    https://github.com/Varbin/xtea/issues . 
 
+Resources
+=========
+
+* PyPi: https://pypi.org/project/xtea
+* Docs: http://xtea.readthedocs.io/
+* Source code: https://github.com/varbin/xtea
+* Issue tracker: https://github.com/varbin/xtea/issues

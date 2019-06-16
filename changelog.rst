@@ -12,7 +12,8 @@ Changelog
 - [BREAKING CHANGE] CFB mode is now correctly implemented.
   By setting ``partition_size`` it is possible to set the
   internal partition size (in bits) as per PEP-272.
-- Python 3: An optional C extension improves speed upto a factor of
+- Python 3: An optional C extension improves speed upto a factor of 10.
+- [BREAKING CHANGE] `block_size` and `key_size` is now in bytes.
 
 (unreleased) Version 0.6.0; Oct 16, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

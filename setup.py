@@ -22,7 +22,9 @@ BUILD_EXTENSION = not any((
     sys.version_info[0] < 3,
     (sys.platform == 'win32'
         and sys.version_info[0] == 3
-        and sys.version_info[1] == 4)
+        and sys.version_info[1] == 4),
+    'test' in sys.argv[1:],
+    'develop' in sys.argv[1:]
 ))
 
 

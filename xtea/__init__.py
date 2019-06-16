@@ -1,9 +1,8 @@
 """
 XTEA-Cipher in Python (eXtended Tiny Encryption Algorithm)
 
-XTEA is a blockcipher with 8 bytes blocksize and 16 bytes Keysize (128-Bit).
-The algorithm is secure at 2014 with the recommend 64 rounds (32 cycles). This
-implementation supports following modes of operation:
+XTEA is a block cipher with 8 bytes block size and 16 bytes key size (128-Bit).
+This implementation supports following modes of operation:
 ECB, CBC, CFB, OFB, CTR
 
 Example:
@@ -12,6 +11,7 @@ Example:
 >>> from binascii import hexlify
 >>> key = b" "*16  # Never use this
 >>> text = b"This is a text. "*8
+>>> # Use a unique IV each time
 >>> x = new(key, mode=MODE_OFB, IV=b"12345678")
 >>> c = x.encrypt(text)
 >>> hexlify(c).decode()
@@ -23,6 +23,10 @@ e5897bfd2450982379267e6cd7405b477ccc19d6c0d32e2f
 887b76fe01d621a8d'
 >>> text == x.decrypt(c)
 True
+
+.. warning::
+   This module is a low level library.
+
 """
 
 from __future__ import print_function
@@ -77,12 +81,23 @@ except ImportError:
 
         return v0, v1
 
-
+#: Constant for Electronic Codebook mode of operation.
 MODE_ECB = 1
+
+#: Constant for Cipher Block Chaining mode of operation.
 MODE_CBC = 2
+
+#: Constant for Cipher Feedback mode of operation.
 MODE_CFB = 3
+
+#: Constant for PGP mode of operation.
+#: This mode is not implemented yet.
 MODE_PGP = 4
+
+#: Constant for Output Feedback of operation.
 MODE_OFB = 5
+
+#: Constant for Counter mode of operation
 MODE_CTR = 6
 
 PY_3 = sys.version_info.major >= 3
@@ -102,12 +117,77 @@ else:
     def b_chr(n):
         return chr(n)
 
-
-block_size = 64
-key_size = 128
+#: Block size of XTEA in bytes
+#:
+#: .. versionchanged:: 0.7.0
+#:    This constant is measured in bytes now.
+block_size = 8
+#: Key size of XTEA in bytes
+#:
+#: .. versionchanged:: 0.7.0
+#:    This constant is measured in bytes now.
+key_size = 16
 
 
 def new(key, **kwargs):
+    r"""
+    Create an "XTEACipher" object.
+
+    It's fully PEP-272 compliant, default mode is ECB.
+
+    :param key:
+        The key for encryption/decryption. Must be 16 in length.
+    :type key: `bytes`
+
+    :param mode:
+        Mode of operation, must be one of this::
+
+            1 = ECB
+            2 = CBC
+            3 = CFB
+            5 = OFB
+            6 = CTR
+
+    :type mode: `int`
+
+    :param \**kwargs:
+        See below
+
+    :Keyword arguments:
+        * **IV** or **iv** (`bytes`):
+            Initialization vector with 8 bytes in length.
+            For security reasons it should be *unpredictable*
+            and *must never be used twice for the same key*!.
+
+            **Required for**: *CBC*, *CFB* and *OFB* mode of operation.
+
+
+        * **counter** (`callable`):
+            Callable counter which returns 8 bytes each call.
+            For security reasons the counter *must not have the same
+            output twice*.
+
+            **Required for**: *CTR* mode of operation.
+
+            .. versionchanged:: 0.5.0
+                Integers instead of callable objects are not accepted
+                anymore.
+
+        * **segment_size** (`int`):
+            The segment size for one encryption "segment" in
+            *CFB* mode in *bits*. It must be a multiple of 8
+            and between 8 and 64.
+
+            **Required for**: *CFB* mode.
+
+        * **endian** (`str`): Endianess of internal conversions.
+            Defaults to "!" meaning big endian.
+
+             .. seealso:: Standard library's :py:mod:`struct`
+
+        * **rounds** (`int` or `float`):
+            Rounds of the xtea cipher, defaults to 64.
+    """
     return XTEACipher(key, **kwargs)
 
 
@@ -115,21 +195,14 @@ def new(key, **kwargs):
 
 
 class XTEACipher(PEP272Cipher):
-    """The cipher class
+    """The cipher class, mostly PEP-272 compatible.
 
-    Functions:
-    encrypt -- encrypt data
-    decrypt -- decrypt data
 
-    _block -- splits the data in blocks (you may need padding)
-
-    Constants:
-    block_size = 8
-
-    Variables:
-    IV -- the initialisation vector (default None or "\00"*8)
-    counter -- counter for CTR (default None)
-
+    :var block_size: Block size in bytes
+    :var IV:
+        Initialization vector used at class instantiation.
+        Contrary to PEP-272 it does not update its value after encryption.
+        The updated value is currently stored at `_status`.
     """
 
     block_size = 8
@@ -137,65 +210,6 @@ class XTEACipher(PEP272Cipher):
     counter = None
 
     def __init__(self, key, mode=None, **kwargs):
-        r"""
-        Create an "XTEACipher" object.
-
-        It's fully PEP-272 compliant, default mode is ECB.
-
-        :param key:
-            The key for encryption/decryption. Must be 16 in length.
-        :type key: `bytes`
-
-        :param mode:
-            Mode of operation, must be one of this::
-
-                1 = ECB
-                2 = CBC
-                3 = CFB
-                5 = OFB
-                6 = CTR
-
-        :type mode: `int`
-
-        :param \**kwargs:
-            See below
-
-        :Keyword arguments:
-            * *IV* or *iv* (`bytes`):
-                Initialization vector with 8 bytes in length.
-                For **security reasons** it should be *unpredictable*
-                and *must never be used twice for the same key*!.
-
-                **Required for**: *CBC*, *CFB* and *OFB* mode of operation.
-
-
-            * *counter* (``callable``):
-                Callable counter which returns 8 bytes each call.
-                For **security reasons** the counter must not have the same
-                output twice.
-
-                **Required for**: *CTR* mode of operation.
-
-                .. versionchanged:: 0.5.0
-                    Integers instead of callable objects are not accepted
-                    anymore.
-
-            * *segment_size* (`int`):
-                The segment size for one encryption "segment" in
-                *CFB* mode in *bits*. It must be a multiple of 8
-                and between 8 and 64.
-
-                **Required for**: *CFB* mode.
-
-            * *endian* (``str``): Endianess of internal conversions.
-                Defaults to "!" meaning big endian.
-
-                 ..seealso:: modules :py:mod:`struct`
-
-            * *rounds* (`int` or `float`):
-                Rounds of the xtea cipher, defaults to 64.
-        """
-
         if mode is None:
             mode = MODE_ECB
             warnings.warn("Implicitly selecting ECB mode of operation. "
@@ -210,6 +224,7 @@ class XTEACipher(PEP272Cipher):
         self.__k = struct.unpack(self.endian + "4L", self.key)
 
     def encrypt_block(self, key, block, **kwargs):
+        """Encrypt a single block with XTEA."""
         encrypted_block = _encrypt_int(
             self.__k,
             struct.unpack(self.endian + "2L", block),
@@ -222,6 +237,7 @@ class XTEACipher(PEP272Cipher):
         )
 
     def decrypt_block(self, key, block, **kwargs):
+        """Decrypt a single block with XTEA."""
         decrypted_block = _decrypt_int(
             self.__k,
             struct.unpack(self.endian + "2L", block),
@@ -234,7 +250,7 @@ class XTEACipher(PEP272Cipher):
         )
 
 
-new.__doc__ = XTEACipher.__init__.__doc__
+XTEACipher.__doc__ += new.__doc__
 
 # Util functions: basic encrypt/decrypt, xor
 """
