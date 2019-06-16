@@ -36,7 +36,7 @@ __all__ = ("new", "XTEACipher",
            "MODE_CTR", "MODE_OFB", "MODE_PGP",
            "key_size", "block_size")
 
-__version__ = "0.7.0.dev0"
+__version__ = "0.7.0"
 __author__ = "Simon Biewald"
 __email__ = "simon@fam-biewald.de"
 __license__ = "Public Domain"
