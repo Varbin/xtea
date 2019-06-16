@@ -17,10 +17,13 @@ import platform
 import sys
 import traceback
 
-C_PYTHON_3 = (
-        platform.python_implementation() == "CPython" and
-        sys.version_info[0] > 2
-)
+BUILD_EXTENSION = not any((
+    platform.python_implementation() != "CPython",
+    sys.version_info[0] < 3,
+    (sys.platform == 'win32'
+        and sys.version_info[0] == 3
+        and sys.version_info[1] == 4)
+))
 
 
 def get_file(name):
@@ -88,7 +91,8 @@ kwargs = dict(
 )
 
 
-if C_PYTHON_3:
+if BUILD_EXTENSION:
+    sys.stdout.write("Trying to setup extension module!\n")
     n_args = kwargs.copy()
     n_args["ext_modules"] = [
         Extension('_xtea',

@@ -52,10 +52,11 @@ except ImportError:
 
         sum, delta, mask = 0, 0x9e3779b9, 0xffffffff
         for round in range(n):
-            v0 = (v0 + (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
+            v0 = (v0 + (((v1 << 4 ^ v1 >> 5) + v1) ^
+                        (sum + k[sum & 3]))) & mask
             sum = (sum + delta) & mask
-            v1 = (v1 +
-                  (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
+            v1 = (v1 + (((v0 << 4 ^ v0 >> 5) + v0) ^
+                        (sum + k[sum >> 11 & 3]))) & mask
 
         return v0, v1
 
@@ -65,10 +66,11 @@ except ImportError:
         delta, mask = 0x9e3779b9, 0xffffffff
         sum = (delta * n) & mask
         for round in range(n):
-            v1 = (v1 -
-                  (((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + k[sum >> 11 & 3]))) & mask
+            v1 = (v1 - (((v0 << 4 ^ v0 >> 5) + v0) ^
+                        (sum + k[sum >> 11 & 3]))) & mask
             sum = (sum - delta) & mask
-            v0 = (v0 - (((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + k[sum & 3]))) & mask
+            v0 = (v0 - (((v1 << 4 ^ v1 >> 5) + v1) ^
+                        (sum + k[sum & 3]))) & mask
 
         return v0, v1
 
