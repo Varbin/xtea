@@ -1,8 +1,8 @@
 Changelog
 ---------
 
-(dev) Version 0.7.0, former 0.6.1; ...
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 0.7.1, former 0.6.1 / 0.7.0; Jun 16, 2018
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Improved tests
 - PEP8-style formatting
@@ -14,6 +14,7 @@ Changelog
   internal partition size (in bits) as per PEP-272.
 - Python 3: An optional C extension improves speed upto a factor of 10.
 - [BREAKING CHANGE] `block_size` and `key_size` is now in bytes.
+- Skipped 0.7.0 with
 
 (unreleased) Version 0.6.0; Oct 16, 2016
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
