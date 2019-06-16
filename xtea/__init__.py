@@ -250,7 +250,10 @@ class XTEACipher(PEP272Cipher):
         )
 
 
-XTEACipher.__doc__ += new.__doc__
+try:
+    XTEACipher.__doc__ += new.__doc__
+except AttributeError:  # Python 2
+    pass
 
 # Util functions: basic encrypt/decrypt, xor
 """
