@@ -252,7 +252,7 @@ class XTEACipher(PEP272Cipher):
 
 try:
     XTEACipher.__doc__ += new.__doc__
-except AttributeError:  # Python 2
+except (AttributeError, TypeError):  # Python 2
     pass
 
 # Util functions: basic encrypt/decrypt, xor
