@@ -17,6 +17,7 @@ import platform
 import sys
 import traceback
 
+EXCLUDE_EXTENSION_FLAG = '--exclude-extension'
 BUILD_EXTENSION = not any((
     platform.python_implementation() != "CPython",
     sys.version_info[0] < 3,
@@ -24,8 +25,12 @@ BUILD_EXTENSION = not any((
         and sys.version_info[0] == 3
         and sys.version_info[1] == 4),
     'test' in sys.argv[1:],
-    'develop' in sys.argv[1:]
+    'develop' in sys.argv[1:],
+    EXCLUDE_EXTENSION_FLAG in sys.argv
 ))
+
+if EXCLUDE_EXTENSION_FLAG in sys.argv:
+    sys.argv.pop(sys.argv.index(EXCLUDE_EXTENSION_FLAG))
 
 
 def get_file(name):
