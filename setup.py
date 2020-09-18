@@ -99,7 +99,8 @@ if BUILD_EXTENSION:
     n_args["ext_modules"] = [
         Extension('_xtea',
                   sources=['xtea.c'],
-                  optional=True)
+                  optional=True,
+                  py_limited_api=True)
     ]
 
     try:
