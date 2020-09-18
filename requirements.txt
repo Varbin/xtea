@@ -4,3 +4,4 @@ pytest-runner>=2.0.0
 coverage>=4.0.0
 pep272-encryption>=0.3
 setuptools>=27.3
+wheel
