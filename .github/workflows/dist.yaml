@@ -1,4 +1,4 @@
-name: bdist_wheel
+name: Build Packages
 
 on: [push]
 
