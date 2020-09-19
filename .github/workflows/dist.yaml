@@ -47,8 +47,8 @@ jobs:
     steps:
     - name: Build abi3 wheel
       run: |
-        for P in manylinux1_x86_64 manylinux1_x86; do
-          if [ "$P" = manylinux1_x86 ]; then
+        for P in manylinux1_x86_64 manylinux1_i686; do
+          if [ "$P" = manylinux1_i686 ]; then
             PRE="linux32"
           else
             PRE=""
@@ -56,8 +56,8 @@ jobs:
           docker pull quay.io/pypa/$P
           docker run --rm -e PLAT=$P -v $(pwd):/io quay.io/pypa/$P $PRE sh -c "
             cd /io
-            pip install -r requirements.txt
-            /opt/python/cp36-cp36m/python3 setup.py bdist_wheel --py-limited-api cp35
+            /opt/python/cp36-cp36m/bin/pip install -r requirements.txt
+            /opt/python/cp36-cp36m/bin/python3 setup.py bdist_wheel --py-limited-api cp35
             auditwheel repair dist/*.whl
           "
         done
