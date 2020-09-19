@@ -96,6 +96,7 @@ kwargs = dict(
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     install_requires=['pep272-encryption>=0.3'],
+    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*'
 )
 
 
