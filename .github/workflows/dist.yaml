@@ -60,6 +60,7 @@ jobs:
             /opt/python/cp36-cp36m/bin/pip install -r requirements.txt
             /opt/python/cp36-cp36m/bin/python3 setup.py bdist_wheel --py-limited-api cp35
             auditwheel repair dist/*.whl
+            rm dist/*.whl
           "
         done
     - name: Upload
