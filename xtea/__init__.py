@@ -54,11 +54,13 @@ try:
         decrypt_int as _decrypt_int
 
 except ImportError:
+    # Variable names are from from the reference implementation
+    # pylint: disable=invalid-name,redefined-builtin
     def _encrypt_int(k, v, n=32):
         v0, v1 = v
 
         sum, delta, mask = 0, 0x9e3779b9, 0xffffffff
-        for round in range(n):
+        for _ in range(n):
             v0 = (v0 + (((v1 << 4 ^ v1 >> 5) + v1) ^
                         (sum + k[sum & 3]))) & mask
             sum = (sum + delta) & mask
@@ -72,7 +74,7 @@ except ImportError:
 
         delta, mask = 0x9e3779b9, 0xffffffff
         sum = (delta * n) & mask
-        for round in range(n):
+        for _ in range(n):
             v1 = (v1 - (((v0 << 4 ^ v0 >> 5) + v0) ^
                         (sum + k[sum >> 11 & 3]))) & mask
             sum = (sum - delta) & mask
@@ -105,28 +107,36 @@ PY_3 = sys.version_info.major >= 3
 if PY_3:
 
     def b_ord(n):
+        """Get integer value of single byte."""
+        # pylint: disable=invalid-name
         return n
 
     def b_chr(n):
+        """Get byte of a single integer."""
+        # pylint: disable=invalid-name
         return bytes([n])
 else:
 
     def b_ord(n):
+        """Get integer value of single byte."""
+        # pylint: disable=invalid-name
         return ord(n)
 
     def b_chr(n):
+        """Get byte of a single integer."""
+        # pylint: disable=invalid-name
         return chr(n)
 
 #: Block size of XTEA in bytes
 #:
 #: .. versionchanged:: 0.7.0
 #:    This constant is measured in bytes now.
-block_size = 8
+block_size = 8  # pylint: disable=invalid-name
 #: Key size of XTEA in bytes
 #:
 #: .. versionchanged:: 0.7.0
 #:    This constant is measured in bytes now.
-key_size = 16
+key_size = 16  # pylint: disable=invalid-name
 
 
 def new(key, **kwargs):
@@ -215,6 +225,8 @@ class XTEACipher(PEP272Cipher):
             warnings.warn("Implicitly selecting ECB mode of operation. "
                           "The ECB mode is usually insecure to use.")
 
+        # Python 2 is still supported by this package
+        # pylint: disable=super-with-arguments
         super(XTEACipher, self).__init__(key, mode, **kwargs)
 
         self.rounds = int(kwargs.get("rounds", 64))
@@ -256,14 +268,13 @@ except (AttributeError, TypeError):  # Python 2
     pass
 
 # Util functions: basic encrypt/decrypt, xor
-"""
-This are utilities only, use them only if you know what you do.
-
-Functions:
-_encrypt -- Encrypt one single block of data.
-_decrypt -- Decrypt one single block of data.
-xor_strings -- xor to strings together.
-"""
+#
+# This are utilities only, use them only if you know what you do.
+#
+# Functions:
+#  _encrypt -- Encrypt one single block of data.
+#  _decrypt -- Decrypt one single block of data.
+#  xor_strings -- xor to strings together.
 
 
 def _encrypt(key, block, n=32, endian="!"):
@@ -278,6 +289,8 @@ def _encrypt(key, block, n=32, endian="!"):
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
+    # pylint: disable=invalid-name
+
     v = struct.unpack(endian + "2L", block)
     k = struct.unpack(endian + "4L", key)
 
@@ -298,6 +311,8 @@ def _decrypt(key, block, n=32, endian="!"):
           -> more security and slowness (default 32)
     endian -- how struct will handle data (default "!" (big endian/network))
     """
+    # pylint: disable=invalid-name
+
     v = struct.unpack(endian + "2L", block)
     k = struct.unpack(endian + "4L", key)
 
@@ -315,6 +330,7 @@ if PY_3:
         s -- string one
         t -- string two
         """
+        # pylint: disable=invalid-name
         return bytes([(x ^ y) for x, y in zip(s, t)])
 else:
 
@@ -325,4 +341,5 @@ else:
         s -- string one
         t -- string two
         """
+        # pylint: disable=invalid-name
         return "".join(chr(ord(x) ^ ord(y)) for x, y in zip(s, t))

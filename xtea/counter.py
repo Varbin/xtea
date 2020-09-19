@@ -1,3 +1,7 @@
+"""
+Simple counter for the CTR mode of operation.
+"""
+
 import struct
 import sys
 
@@ -6,38 +10,46 @@ PY_3 = sys.version_info.major >= 3
 if PY_3:
 
     def to_bytes(integer, length, byteorder):
+        """Convert integer to bytes."""
         return integer.to_bytes(length, byteorder)
 
     def from_bytes(bytesarray, byteorder):
+        """Get int from from bytes"""
         return int.from_bytes(bytesarray, byteorder)
 else:
 
     def to_bytes(integer, length, byteorder='big'):
-        h = '%x' % integer
-        s = ('0' * (len(h) % 2) + h).zfill(length * 2).decode('hex')
+        """Convert integer to bytes."""
+        hexr = '%x' % integer
+        string = ('0' * (len(hexr) % 2) + hexr).zfill(length * 2).decode('hex')
+
         if byteorder == 'big':
-            return s
-        elif byteorder == 'little':
-            return s[::-1]
-        else:
-            raise ValueError("byteorder must be either 'little' or 'big'")
+            return string
+        if byteorder == 'little':
+            return string[::-1]
+
+        raise ValueError("byteorder must be either 'little' or 'big'")
 
     def from_bytes(bytesarray, byteorder):
+        """Get int from from bytes"""
         if len(bytesarray) == 4:
             size = 'L'
         elif len(bytesarray) == 8:
             size = 'Q'
+        else:
+            raise ValueError("Only 4 and 8 byte counters are "
+                             "supported on Python 2.")
 
         if byteorder == 'big':
             return struct.unpack(">" + size, bytesarray)[0]
-        elif byteorder == 'little':
+        if byteorder == 'little':
             return struct.unpack("<" + size, bytesarray)[0]
-        else:
-            raise ValueError("byteorder must be either 'little' or 'big'")
+
+        raise ValueError("byteorder must be either 'little' or 'big'")
 
 
 class Counter:
-    """Small counter for CTR mode, based on arrays
+    """Small counter for CTR mode.
     Example:
 
         >>> from xtea.counter import Counter
