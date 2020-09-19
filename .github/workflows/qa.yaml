@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-18.04, macos-10.15, windows-2019]
+        os: [ubuntu-20.04, macos-10.15, windows-2019]
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, pypy2, pypy3]
 
     steps:
@@ -22,31 +22,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         pip install -r requirements.txt
-    - name: Get codeclimate reporter
-      shell: pwsh
-      run: |
-        if ($PSVersionTable.OS.Contains("Linux") -and $env:GITHUB_REF -eq "refs/heads/master") {
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 -o ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-        } else {
-          Write-Host "Skipped on this platform."
-        }
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
     - name: Test
       run: |
-        python -m coverage run --source=xtea setup.py test
-        python -m coverage xml
-        python -m coverage report
-    - name: Push coverage to codeclimate
-      shell: pwsh
-      run: |
-        if ($PSVersionTable.OS.Contains("Linux") -and $env:GITHUB_REF -eq "refs/heads/master") {
-          ./cc-test-reporter after-build
-          exit $LASTEXITCODE
-        } else {
-          Write-Host "Skipped on this platform."
-        }
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        python setup.py test

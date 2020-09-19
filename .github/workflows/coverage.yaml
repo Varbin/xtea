@@ -1,0 +1,44 @@
+ame: Coverage
+
+on:
+  push:
+      branches:
+        - master
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get codeclimate reporter
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 -o ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - run: |
+        python -m coverage run -p --source=xtea setup.py test
+    - uses: actions/setup-python@v2
+      with:
+        python-version: pypy2
+    - run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - run: |
+        python -m coverage run -p --source=xtea setup.py test
+    - run: |
+        python -m coverage combine
+        python -m coverage xml
+        python -m coverage report
+    - name: Push coverage to codeclimate
+      run: ./cc-test-reporter after-build
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
