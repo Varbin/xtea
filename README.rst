@@ -2,6 +2,10 @@
 Python XTEA
 ===========
 
+.. image:: https://github.com/varbin/xtea/workflows/QA/badge.svg
+   :target: https://github.com/Varbin/xtea/actions
+   :alt: Github Actions: QA
+
 .. image:: https://api.codeclimate.com/v1/badges/563d6ad2607d6ed6fda3/maintainability
    :target: https://codeclimate.com/github/Varbin/xtea/maintainability
    :alt: Maintainability
@@ -9,14 +13,6 @@ Python XTEA
 .. image:: https://api.codeclimate.com/v1/badges/563d6ad2607d6ed6fda3/test_coverage
    :target: https://codeclimate.com/github/Varbin/xtea/test_coverage
    :alt: Test Coverage
-
-.. image:: https://travis-ci.org/Varbin/xtea.svg?branch=master
-   :target: https://travis-ci.org/Varbin/xtea
-   :alt: Travis CI build status
-
-.. image:: https://ci.appveyor.com/api/projects/status/mgfc1g53vvc9umkl?svg=true
-   :target: https://ci.appveyor.com/project/Varbin/xtea/
-   :alt: Appveyor CI build status
 
 .. image:: https://readthedocs.org/projects/xtea/badge/?version=latest
    :target: https://xtea.readthedocs.io/en/latest/?badge=latest
