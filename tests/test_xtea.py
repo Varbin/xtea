@@ -1,85 +1,105 @@
+"""
+Tests if ciphertexts can be decrypted and collect performance data.
+
+The tests do not validate the modes to work as specified.
+"""
+
 import unittest
 import os
-
-import time
 
 from xtea import MODE_CBC, MODE_CTR, MODE_ECB, MODE_OFB, MODE_CFB, XTEACipher
 from xtea.counter import Counter
 
 AMOUNT = 50
 
-if hasattr(time, "perf_counter"):
-    clock = time.perf_counter
-else:
-    clock = time.clock
+try:
+    from time import perf_counter as clock
+except ImportError:
+    from time import clock
 
 
 def _test_mode(mode):
     plain = os.urandom(56) * 8
     counter = Counter(os.urandom(8))
     key = os.urandom(16)
-    iv = os.urandom(8)
+    iv = os.urandom(8)  # pylint: disable=invalid-name
 
-    e = XTEACipher(key, IV=iv, counter=counter, mode=mode, segment_size=64)
-    encrypted = e.encrypt(plain)
+    encrypter = XTEACipher(key, IV=iv,
+                           counter=counter, mode=mode, segment_size=64)
+    encrypted = encrypter.encrypt(plain)
 
-    d = XTEACipher(key, IV=iv, counter=counter, mode=mode, segment_size=64)
+    decrypter = XTEACipher(key, IV=iv,
+                           counter=counter, mode=mode, segment_size=64)
 
     counter.reset()
-    decrypted = d.decrypt(encrypted)
+    decrypted = decrypter.decrypt(encrypted)
     if plain != decrypted:
         raise AssertionError("Invalid decryption!")
 
 
 class TestModes(unittest.TestCase):
-    def testECB(self):
+    """
+    Test the modes of operation and gather performance data.
+    """
+
+    @staticmethod
+    def test_ecb():
+        """Test and profile ECB mode of operation."""
         print("Testing ECB")
 
         start = clock()
-        for i in range(AMOUNT):
+        for _ in range(AMOUNT):
             _test_mode(MODE_ECB)
         end = clock()
         time = end - start
         print("Time: %s" % str(round(time, 3)))
 
-    def testCBC(self):
+    @staticmethod
+    def test_cbc():
+        """Test and profile CBC mode of operation."""
         print("Testing CBC")
         start = clock()
 
-        for i in range(AMOUNT):
+        for _ in range(AMOUNT):
             _test_mode(MODE_CBC)
 
         end = clock()
         time = end - start
         print("Time: %s" % str(round(time, 3)))
 
-    def testCFB(self):
+    @staticmethod
+    def test_cfb():
+        """Test and profile CFB mode of operation."""
         print("Testing CFB")
         start = clock()
 
-        for i in range(AMOUNT):
+        for _ in range(AMOUNT):
             _test_mode(MODE_CFB)
 
         end = clock()
         time = end - start
         print("Time: %s" % str(round(time, 3)))
 
-    def testOFB(self):
+    @staticmethod
+    def test_ofb():
+        """Test and profile OFB mode of operation."""
         print("Testing OFB")
         start = clock()
 
-        for i in range(AMOUNT):
+        for _ in range(AMOUNT):
             _test_mode(MODE_OFB)
 
         end = clock()
         time = end - start
         print("Time: %s" % str(round(time, 3)))
 
-    def testCTR(self):
+    @staticmethod
+    def test_ctr():
+        """Test and profile CTR mode of operation."""
         print("Testing CTR")
         start = clock()
 
-        for i in range(AMOUNT):
+        for _ in range(AMOUNT):
             _test_mode(MODE_CTR)
 
         end = clock()
