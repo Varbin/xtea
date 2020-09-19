@@ -3,7 +3,7 @@ name: Build Packages
 on: [push]
 
 jobs:
-  Build wheels for MacOS:
+  wheels-macos:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -30,12 +30,11 @@ jobs:
       with:
         path: dist/*
 
-  Build wheels for Windows:
-    runs-on: windows-
+  wheels-windows:
+    runs-on: windows-2019
 
     strategy:
       matrix:
-        os: [macos-10.15]
         python-version: [3.6]
 
     steps:
@@ -69,7 +68,7 @@ jobs:
         with:
           path: dist/*
 
-  Build sdist and fallback wheel:
+  sdist-and-pure-wheel:
     runs-on: ubuntu-20.04
 
     steps:
@@ -97,7 +96,7 @@ jobs:
         with:
           path: dist/*
 
-  Build wheel for manylinux:
+  wheels-for-manylinux:
     runs-on: ubuntu-20.04
 
     steps:
