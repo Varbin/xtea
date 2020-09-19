@@ -44,22 +44,19 @@ jobs:
   manylinux1:
     runs-on: ubuntu-20.04
 
-    strategy:
-      matrix:
-        platform: [manylinux1_x86_64, manylinux1_x86]
-
     steps:
-    - name: Download Image
-      run: docker pull quay.io/pypa/${{ platform }}
     - name: Build abi3 wheel
       run: |
-        docker run -e PLAT=${{ platform }} -v $(pwd):/io quay.io/pypa/${{ platform }} \
-        <<<EOL
-        cd io
-        pip install -r requirements.txt
-        /opt/python/cp36-cp36m/python3 setup.py bdist_wheel --py-limited-api cp35
-        auditwheel repair dist/*.whl
-        EOL
+        for P in manylinux1_x86_64 manylinux1_x86; do
+          docker pull quay.io/pypa/$P
+          docker run -e PLAT=$P -v $(pwd):/io quay.io/pypa/$P \
+          <<<EOL
+          cd io
+          pip install -r requirements.txt
+          /opt/python/cp36-cp36m/python3 setup.py bdist_wheel --py-limited-api cp35
+          auditwheel repair dist/*.whl
+          EOL
+        done
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
