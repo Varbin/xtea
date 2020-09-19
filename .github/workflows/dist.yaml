@@ -49,8 +49,7 @@ jobs:
       run: |
         for P in manylinux1_x86_64 manylinux1_x86; do
           docker pull quay.io/pypa/$P
-          docker run -e PLAT=$P -v $(pwd):/io quay.io/pypa/$P \
-          <<<EOL
+          docker run --rm -e PLAT=$P -v $(pwd):/io quay.io/pypa/$P <<<EOL
           cd /io
           pip install -r requirements.txt
           /opt/python/cp36-cp36m/python3 setup.py bdist_wheel --py-limited-api cp35
