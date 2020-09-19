@@ -1,6 +1,6 @@
 name: QA
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   test:
@@ -22,6 +22,31 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         pip install -r requirements.txt
+    - name: Get codeclimate reporter
+      shell: pwsh
+      run: |
+        if ($PSVersionTable.OS.Contains("Linux") -and $env:GITHUB_REF -eq "refs/heads/master") {
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+        } else {
+          Write-Host "Skipped on this platform."
+        }
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
     - name: Test
       run: |
-        python setup.py test
+        python -m coverage run --source=xtea setup.py test
+        python -m coverage xml
+        python -m coverage report
+    - name: Push coverage to codeclimate
+      shell: pwsh
+      run: |
+        if ($PSVersionTable.OS.Contains("Linux") -and $env:GITHUB_REF -eq "refs/heads/master") {
+          ./cc-test-reporter after-build
+          exit $LASTEXITCODE
+        } else {
+          Write-Host "Skipped on this platform."
+        }
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
