@@ -5,13 +5,14 @@ Testvectors for XTEA found at:
 
 """
 
-import xtea
 from binascii import hexlify
 from binascii import unhexlify
 
+import xtea
 
-def _unwrap(s):
-    return unhexlify(s.replace(' ', ''))
+
+def _unwrap(string):
+    return unhexlify(string.replace(' ', ''))
 
 
 TEST_VECTORS = [
@@ -49,15 +50,18 @@ TEST_VECTORS = [
 
 
 def test_encryption():
-    for i in range(len(TEST_VECTORS)):
-        vector = TEST_VECTORS[i]
-        e = _unwrap(vector['p'])
+    """
+    Test this xtea implementation against test vectors.
+    """
+    for i, vector in enumerate(TEST_VECTORS):
+        # pylint: disable=invalid-name
+        p = _unwrap(vector['p'])
         c = _unwrap(vector['c'])
         k = _unwrap(vector['k'])
 
         x = xtea.new(key=k, mode=xtea.MODE_ECB)
         try:
-            r = x.encrypt(e)
+            r = x.encrypt(p)
             assert r == c
         except AssertionError:
             print("Error on test %s:" % i)
@@ -67,19 +71,22 @@ def test_encryption():
 
 
 def test_decryption():
-    for i in range(len(TEST_VECTORS)):
-        vector = TEST_VECTORS[i]
-        e = _unwrap(vector['p'])
+    """
+    Test this xtea implementation against test vectors.
+    """
+    for i, vector in enumerate(TEST_VECTORS):
+        # pylint: disable=invalid-name
+        p = _unwrap(vector['p'])
         c = _unwrap(vector['c'])
         k = _unwrap(vector['k'])
 
         x = xtea.new(key=k, mode=xtea.MODE_ECB)
         try:
             r = x.decrypt(c)
-            assert r == e
+            assert r == p
         except AssertionError:
             print("Error on test %s:" % i)
-            print("Expected %s, got %s!" % (hexlify(e).decode(),
+            print("Expected %s, got %s!" % (hexlify(p).decode(),
                                             hexlify(r).decode()))
             raise
 
@@ -87,6 +94,7 @@ def test_decryption():
 if __name__ == "__main__":
     if not __debug__:
         raise Exception("This script uses \"assert\" for tests. "
-                        "Do not -O or -OO to run it.")
+                        "Do not -O or -OO to run it."
+                        "Please use pytest.")
     test_encryption()
     test_decryption()
