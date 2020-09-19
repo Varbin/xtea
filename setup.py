@@ -100,7 +100,6 @@ kwargs = dict(
 
 
 if BUILD_EXTENSION:
-    sys.stdout.write("Trying to setup extension module!\n")
     n_args = kwargs.copy()
     n_args["ext_modules"] = [
         Extension('_xtea',
