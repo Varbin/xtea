@@ -32,20 +32,17 @@ else:
 
     def from_bytes(bytesarray, byteorder):
         """Get int from from bytes"""
-        if len(bytesarray) == 4:
-            size = 'L'
-        elif len(bytesarray) == 8:
-            size = 'Q'
-        else:
-            raise ValueError("Only 4 and 8 byte counters are "
-                             "supported on Python 2.")
+        if byteorder == "little":
+            bytesarray = str(bytesarray)[::-1]
+        elif byteorder != "big":
+            raise ValueError("byteorder must be either 'little' or 'big'")
 
-        if byteorder == 'big':
-            return struct.unpack(">" + size, bytesarray)[0]
-        if byteorder == 'little':
-            return struct.unpack("<" + size, bytesarray)[0]
+        result = 0
+        for i in bytesarray:
+            result <<= 8
+            result += ord(i)
 
-        raise ValueError("byteorder must be either 'little' or 'big'")
+        return result
 
 
 class Counter:
