@@ -146,8 +146,9 @@ jobs:
             echo "http://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community" >> /etc/apk/repositories
             
             set -x
-            apk add python3 gcc py3-pip gcc musl-dev
+            apk add python3 python3-dev gcc py3-pip gcc musl-dev
             pip3 install -r requirements.txt
+            pip3 install auditwheel
             python3 setup.py bdist_wheel --py-limited-api cp35
             auditwheel repair dist/*.whl
             rm dist/*.whl
