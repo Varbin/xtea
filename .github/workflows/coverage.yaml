@@ -25,7 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - run: |
-        python -m coverage run --source xtea -m pytest
+        python -m coverage run -p --source xtea -m pytest
     - uses: actions/setup-python@v2
       with:
         python-version: pypy2
@@ -33,7 +33,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - run: |
-        python -m coverage run --source xtea -m pytest
+        python -m coverage run -p --source xtea -m pytest
     - run: |
         python -m coverage combine
         python -m coverage xml
