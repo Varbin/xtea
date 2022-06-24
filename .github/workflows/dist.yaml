@@ -88,7 +88,7 @@ jobs:
         shell: pwsh
         run: |
           $version = (python setup.py --fullname)
-          $tagPyPyAnd2 = "py2.pp35.pp36.pp37-none-any"
+          $tagPyPyAnd2 = "py2.pp35.pp36.pp37.pp38.pp39-none-any"
           $tagUniversal = "py2.py3-none-any"
           Move-Item ./dist/$version-$tagUniversal.whl ./dist/$version-$tagPyPyAnd2.whl
       - name: Upload
