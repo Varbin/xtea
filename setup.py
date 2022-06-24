@@ -1,5 +1,7 @@
 from __future__ import with_statement  # Reading README
 
+import warnings
+
 try:
     from setuptools import setup, Extension
 except ImportError:
@@ -18,15 +20,21 @@ import sys
 import traceback
 
 EXCLUDE_EXTENSION_FLAG = '--exclude-extension'
+TEST = any((
+    "pytest" in sys.argv,
+    "test" in sys.argv,
+    "ptr" in sys.argv
+))
+DEVELOP = 'develop' in sys.argv[1:]
 BUILD_EXTENSION = not any((
     platform.python_implementation() != "CPython",
     sys.version_info[0] < 3,
     (sys.platform == 'win32'
         and sys.version_info[0] == 3
         and sys.version_info[1] == 4),
-    'test' in sys.argv[1:],
-    'develop' in sys.argv[1:],
-    EXCLUDE_EXTENSION_FLAG in sys.argv
+    EXCLUDE_EXTENSION_FLAG in sys.argv,
+    TEST,
+    DEVELOP
 ))
 
 if EXCLUDE_EXTENSION_FLAG in sys.argv:
@@ -93,12 +101,25 @@ kwargs = dict(
         "Topic :: Security",
         "Topic :: Security :: Cryptography"
     ],
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    setup_requires = [],
+    tests_require = [],
     install_requires=['pep272-encryption>=0.3'],
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*'
 )
 
+if TEST or DEVELOP:
+    warnings.warn("""Using `setup.py test` or `setup.py develop` may have \
+undesired side effects.
+
+Setuptools may install missing packages directly, instead of invocing `pip`. \
+It does not have a proper dependency resolver, ignores previously used \
+constraints, and ignores `pip --require-hashes`.
+
+As an alternative for `setup.py test` use the `pytest`, and instead of \
+`setup.py develop` use `pip install -e .`.""")
+if TEST:
+    kwargs["tests_require"] += ["pytest"]
+    kwargs["setup_requires"] += ["pytest_runner"]
 
 if BUILD_EXTENSION:
     n_args = kwargs.copy()
