@@ -51,16 +51,16 @@ class Counter:
 
         >>> from xtea.counter import Counter
         >>> nonce = b"$2dUI84e" # This should be random
-        >>> c = Counter(nonce)
+        >>> c = Counter(nonce, byteorder='little')
+        >>> c()
+        b'$2dUI84e'
         >>> c()
         b'%2dUI84e'
         >>> c()
         b'&2dUI84e'
-        >>> c()
-        b"'2dUI84e"
         >>> c.reset()
         >>> c()
-        b'%2dUI84e'
+        b'$2dUI84e'
     """
 
     def __init__(self, nonce, byteorder='big'):

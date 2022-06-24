@@ -30,11 +30,11 @@ This is an XTEA-Cipher implementation in Python (eXtended Tiny Encryption Algori
 Example:
 
     >>> from xtea import *
-    >>> key = " "*16  # Never use this
-    >>> text = "This is a text. "*8
-    >>> x = new(key, mode=MODE_OFB, IV="12345678")
+    >>> key = b" "*16  # Never use this key
+    >>> text = b"This is a text. "*8
+    >>> x = new(key, mode=MODE_OFB, IV=b"12345678")  # IV's must be unpredictable
     >>> c = x.encrypt(text)
-    >>> text == x.decrypt(c)
+    >>> text == new(key, mode=MODE_OFB, IV=b"12345678").decrypt(c)
     True
     
 

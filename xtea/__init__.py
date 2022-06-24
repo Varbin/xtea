@@ -9,19 +9,14 @@ Example:
 
 >>> from xtea import *
 >>> from binascii import hexlify
->>> key = b" "*16  # Never use this
->>> text = b"This is a text. "*8
+>>> key = b" "*16  # Never use this key
+>>> text = b"This is a text. "
 >>> # Use a unique IV each time
->>> x = new(key, mode=MODE_OFB, IV=b"12345678")
+>>> x = new(key, mode=MODE_OFB, IV=b"12345678")  # IV's must be unpredictable
 >>> c = x.encrypt(text)
 >>> hexlify(c).decode()
-'fa66ec11b82e38bc77c14be093bb8aa0d7fe0fb9e6ec015
-7a22d254fee43aea9a64c8dbb2c2b899f66800f264419c8e
-8796ad8f94c7758b916428019d10573943324a9dcf60f883
-1f0f925cd7215e5dd4f1334d9ee242d41ac02d0a64c49663
-e5897bfd2450982379267e6cd7405b477ccc19d6c0d32e2f
-887b76fe01d621a8d'
->>> text == x.decrypt(c)
+'fa66ec11b82e38bc77c14be093bb8aa0'
+>>> text == new(key, mode=MODE_OFB, IV=b"12345678").decrypt(c)
 True
 
 .. warning::
