@@ -126,3 +126,34 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: wheelhouse/*.whl
+
+  wheels-for-musllinux:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup qemu-user-static for docker
+      run: |
+        docker pull multiarch/qemu-user-static
+        docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - name: Build abi3 wheel
+      run: |
+        ALPINE_VERSION=3.14
+        for P in amd64; do
+          docker pull "alpine:${ALPINE_VERSION}"
+          docker run --rm -e PLAT=$P -e "ALPINE_VERSION=${ALPINE_VERSION}" -v $(pwd):/io "alpine:${ALPINE_VERSION}" $PRE sh -c "
+            cd /io
+            echo "http://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community" >> /etc/apk/repositories
+            
+            set -x
+            apk add python3 gcc py3-pip gcc musl-dev
+            pip3 install -r requirements.txt
+            python3 setup.py bdist_wheel --py-limited-api cp35
+            auditwheel repair dist/*.whl
+            rm dist/*.whl
+          "
+        done
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        path: wheelhouse/*.whl
