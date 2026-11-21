@@ -24,7 +24,7 @@ static PyObject * xtea_encrypt_int(PyObject *self, PyObject *args, PyObject *kwa
     PyObject *v0r = PyLong_FromUnsignedLongLong(v0);
     PyObject *v1r = PyLong_FromUnsignedLongLong(v1);
 
-    return PyTuple_Pack(2, v0r, v1r);
+    return Py_BuildValue("(NN)", v0r, v1r);
 };
 
 
@@ -48,7 +48,7 @@ static PyObject* xtea_decrypt_int(PyObject *self, PyObject *args) {
     PyObject *v0r = PyLong_FromUnsignedLong(v0);
     PyObject *v1r = PyLong_FromUnsignedLong(v1);
 
-    return PyTuple_Pack(2, v0r, v1r);
+    return Py_BuildValue("(NN)", v0r, v1r);
 };
 
 
